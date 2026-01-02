@@ -12,24 +12,22 @@
         #videoBg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.25); pointer-events: none; }
         #flash-effect { position: fixed; inset: 0; background: white; opacity: 0; z-index: 10000; pointer-events: none; transition: 0.2s; }
 
-        /* PERBAIKAN: Padding bawah ditambah agar tidak tertutup NAV */
         .screen { 
             flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; 
             overflow-y: auto; 
-            padding-bottom: 120px; /* Ditambah agar hero paling bawah terlihat jelas */
+            padding-bottom: 120px; 
             z-index: 5;
             opacity: 0; transform: translateY(15px); transition: 0.4s ease;
             -webkit-overflow-scrolling: touch;
         }
         .screen.active { display: flex; opacity: 1; transform: translateY(0); }
 
-        /* PERBAIKAN: Merapikan Grid Koleksi */
         #inv-grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
             gap: 12px; 
             width: 100%; 
-            padding-bottom: 20px; /* Extra space di dalam grid */
+            padding-bottom: 20px; 
         }
 
         .rarity { position: absolute; top: 5px; right: 5px; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; font-family: 'Bebas Neue'; z-index: 5; }
@@ -38,6 +36,12 @@
         .SR { background: var(--purple); color: #fff; }
         .R { background: var(--blue); color: #fff; }
         
+        /* Badge Elemen */
+        .type-badge { position: absolute; top: 5px; left: 5px; padding: 2px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: bold; text-transform: uppercase; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.3); z-index: 5; }
+        .type-Physical { color: #ff4757; border-color: #ff4757; }
+        .type-Energy { color: #3498db; border-color: #3498db; }
+        .type-Tactics { color: #2ecc71; border-color: #2ecc71; }
+
         @keyframes glow-lr { from { box-shadow: 0 0 10px #f00; } to { box-shadow: 0 0 25px #ff0; } }
 
         .card-item { position: relative; aspect-ratio: 2/3; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; transition: 0.3s; }
@@ -45,7 +49,7 @@
         .card-actions { position: absolute; bottom: 0; width: 100%; display: flex; }
         .up-btn { flex: 2; background: var(--green); border: none; color: #fff; font-size: 0.7rem; padding: 5px 0; font-family: 'Bebas Neue'; cursor: pointer; }
 
-        .battle-log { width: 100%; height: 50px; background: rgba(0,0,0,0.6); margin-top: 10px; border-radius: 8px; font-size: 0.75rem; padding: 5px; overflow: hidden; color: #ccc; border: 1px solid #333; }
+        .battle-log { width: 100%; height: 50px; background: rgba(0,0,0,0.6); margin-top: 10px; border-radius: 8px; font-size: 0.75rem; padding: 5px; overflow: hidden; color: #ccc; border: 1px solid #333; text-align: center; }
         .fighter-box { height: 140px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; background-color: #111; position: relative; transition: 0.2s; }
         .hit-anim { animation: shake 0.2s; border-color: var(--red); }
         @keyframes shake { 0%{transform:translateX(0)} 25%{transform:translateX(5px)} 50%{transform:translateX(-5px)} 100%{transform:translateX(0)} }
@@ -55,7 +59,6 @@
         .header { padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 10; backdrop-filter: blur(5px); }
         .diamond-pill { background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: 600; }
         
-        /* Navigasi tetap sama tapi layar sekarang punya padding lebih */
         .nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(10,10,10,0.95); display: flex; border-top: 1px solid #333; z-index: 100; backdrop-filter: blur(10px); padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
         .nav-item.active { color: var(--gold); transform: translateY(-5px); }
@@ -104,6 +107,7 @@
                 <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background:linear-gradient(45deg, #111, #222); border-radius:15px; border:2px solid #444; display:flex; align-items:center; justify-content:center; font-size:4rem; color:#333; font-family:'Bebas Neue';">?</div>
                 <div id="card-img" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); border-radius:15px; border:3px solid var(--gold); background-size:cover; background-position:center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                     <div id="gacha-rarity" class="rarity"></div>
+                    <div id="gacha-type" class="type-badge"></div>
                 </div>
             </div>
         </div>
@@ -125,17 +129,18 @@
 
     <div id="pvp" class="screen">
         <h3 style="font-family:'Bebas Neue'; color:var(--gold);">BATTLE ARENA</h3>
+        <p style="font-size:0.7rem; color:#888; margin-top:-10px;">Physical > Tactics > Energy > Physical</p>
         <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px; padding:10px; background:rgba(0,0,0,0.4); border-radius:15px;"></div>
         <div style="width:100%; background:rgba(0,0,0,0.8); padding:15px; border-radius:15px; border:1px solid #444; margin-top:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="text-align:center; width:45%;">
-                    <div id="p-fighter" class="fighter-box"><div id="p-rar" class="rarity"></div></div>
+                    <div id="p-fighter" class="fighter-box"><div id="p-rar" class="rarity"></div><div id="p-type-battle" class="type-badge"></div></div>
                     <div class="hp-bar"><div id="p-hp" class="hp-fill"></div></div>
                     <span id="p-pwr-val" class="battle-pwr-label">PWR: 0</span>
                 </div>
                 <b style="color:var(--red); font-size:1.5rem; font-family:'Bebas Neue';">VS</b>
                 <div style="text-align:center; width:45%;">
-                    <div id="e-fighter" class="fighter-box"><div id="e-rar" class="rarity"></div></div>
+                    <div id="e-fighter" class="fighter-box"><div id="e-rar" class="rarity"></div><div id="e-type-battle" class="type-badge"></div></div>
                     <div class="hp-bar"><div id="e-hp" class="hp-fill"></div></div>
                     <span id="e-pwr-val" class="battle-pwr-label">PWR: ???</span>
                 </div>
@@ -184,18 +189,18 @@
         const provider = new GoogleAuthProvider();
 
         const heroPool = [
-            { id:1, name:"Saitama God", rar:"LR", rate:0.01, pwr:999999, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
-            { id:2, name:"Cosmic Garou", rar:"LR", rate:0.09, pwr:65000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png" },
-            { id:3, name:"Saitama", rar:"SSR", rate:0.5, pwr:50000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png" },
-            { id:4, name:"Tatsumaki", rar:"SSR", rate:1.0, pwr:42000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/tatsumaki.png" },
-            { id:5, name:"Garou", rar:"SSR", rate:1.2, pwr:40000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/garou.png" },
-            { id:6, name:"Atomic Samurai", rar:"SSR", rate:1.5, pwr:32000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/atomicsamurai.png" },
-            { id:8, name:"Bang", rar:"SSR", rate:1.8, pwr:31000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/bang.png" },
-            { id:9, name:"Genos", rar:"SR", rate:5.0, pwr:22000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/genos.png" },
-            { id:10, name:"Child Emperor", rar:"SR", rate:6.0, pwr:20000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/childemperor.png" },
-            { id:14, name:"Amai Mask", rar:"SR", rate:8.0, pwr:18000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/amaimask.png" },
-            { id:7, name:"Fubuki", rar:"SR", rate:10.0, pwr:15000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/fubuki.png" },
-            { id:13, name:"Mumen Rider", rar:"R", rate:64.9, pwr:1000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
+            { id:1, name:"Saitama God", rar:"LR", rate:0.01, pwr:999999, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
+            { id:2, name:"Cosmic Garou", rar:"LR", rate:0.09, pwr:65000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png" },
+            { id:3, name:"Saitama", rar:"SSR", rate:0.5, pwr:50000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png" },
+            { id:4, name:"Tatsumaki", rar:"SSR", rate:1.0, pwr:42000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/tatsumaki.png" },
+            { id:5, name:"Garou", rar:"SSR", rate:1.2, pwr:40000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/garou.png" },
+            { id:6, name:"Atomic Samurai", rar:"SSR", rate:1.5, pwr:32000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/atomicsamurai.png" },
+            { id:8, name:"Bang", rar:"SSR", rate:1.8, pwr:31000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/bang.png" },
+            { id:9, name:"Genos", rar:"SR", rate:5.0, pwr:22000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/genos.png" },
+            { id:10, name:"Child Emperor", rar:"SR", rate:6.0, pwr:20000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/childemperor.png" },
+            { id:14, name:"Amai Mask", rar:"SR", rate:8.0, pwr:18000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/amaimask.png" },
+            { id:7, name:"Fubuki", rar:"SR", rate:10.0, pwr:15000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/fubuki.png" },
+            { id:13, name:"Mumen Rider", rar:"R", rate:64.9, pwr:1000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
         ];
 
         let db = JSON.parse(localStorage.getItem('OPG_POWER_FIX')) || { 
@@ -241,13 +246,11 @@
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
+            
             const flash = document.getElementById('flash-effect');
-            flash.style.opacity = '1';
-            setTimeout(() => flash.style.opacity = '0', 150);
-            const sfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
-            sfx.play().catch(e => {});
-
+            
             let res = [];
+            let hasBest = false;
             for(let i=0; i<t; i++){
                 db.pity++;
                 let rolled;
@@ -256,12 +259,24 @@
                     let r = Math.random()*100, cur=0;
                     for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
                     if(!rolled) rolled = heroPool[heroPool.length-1];
+                    if(rolled.rar === "LR" || rolled.rar === "SSR") hasBest = true;
                     if(rolled.rar === "LR") db.pity = 0;
                 }
                 res.push(rolled);
                 let o = db.inv.find(x => x.id === rolled.id);
                 if(o) o.dupes++; else db.inv.push({...rolled, lvl:1, dupes:0});
             }
+
+            // Visual Effect Gacha
+            if(hasBest) flash.style.background = "gold";
+            else flash.style.background = "white";
+            
+            flash.style.opacity = '1';
+            setTimeout(() => flash.style.opacity = '0', 200);
+            
+            const sfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
+            sfx.play().catch(e => {});
+
             window.save();
             if(t===1){
                 document.getElementById('multi-view').style.display='none';
@@ -269,6 +284,9 @@
                 document.getElementById('card-img').style.backgroundImage = `url('${res[0].img}')`;
                 document.getElementById('gacha-rarity').innerText = res[0].rar;
                 document.getElementById('gacha-rarity').className = `rarity ${res[0].rar}`;
+                document.getElementById('gacha-type').innerText = res[0].type;
+                document.getElementById('gacha-type').className = `type-badge type-${res[0].type}`;
+                
                 const cardBox = document.getElementById('card-box');
                 cardBox.style.transform = "rotateY(180deg)";
                 setTimeout(()=> cardBox.style.transform="rotateY(0deg)", 2000);
@@ -278,6 +296,7 @@
                 document.getElementById('multi-view').innerHTML = res.map(h => `
                     <div class="card-item">
                         <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
+                        <div class="type-badge type-${h.type}" style="font-size:0.4rem; top:3px; left:3px;">${h.type}</div>
                         <img src="${h.img}" style="width:100%; height:100%; object-fit:cover;">
                     </div>`).join('');
             }
@@ -288,15 +307,30 @@
             const btn = document.getElementById('btn-fight');
             const log = document.getElementById('battle-log');
             btn.disabled = true;
+            
             let enemy = heroPool[Math.floor(Math.random()*heroPool.length)];
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
+            
+            // LOGIKA COUNTER: Physical > Tactics > Energy > Physical
+            let bonusText = "";
+            if((db.selected.type === "Physical" && enemy.type === "Tactics") || 
+               (db.selected.type === "Tactics" && enemy.type === "Energy") || 
+               (db.selected.type === "Energy" && enemy.type === "Physical")) {
+                pPwr = Math.floor(pPwr * 1.3);
+                bonusText = " <small style='color:var(--green)'>+30% ELEMENT BONUS!</small>";
+            }
+
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
             document.getElementById('e-rar').innerText = enemy.rar;
             document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
+            document.getElementById('e-type-battle').innerText = enemy.type;
+            document.getElementById('e-type-battle').className = `type-badge type-${enemy.type}`;
             document.getElementById('e-pwr-val').innerText = `PWR: ${ePwr.toLocaleString()}`;
+            
             let php = 100, ehp = 100;
-            log.innerText = "Battle Start!";
+            log.innerHTML = `Battle Start: ${db.selected.name} vs ${enemy.name}${bonusText}`;
+            
             const loop = setInterval(() => {
                 const hitSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); hitSfx.play().catch(()=>{});
                 document.getElementById('e-fighter').classList.add('hit-anim');
@@ -305,12 +339,23 @@
                     document.getElementById('e-fighter').classList.remove('hit-anim');
                     document.getElementById('p-fighter').classList.remove('hit-anim');
                 }, 200);
-                ehp -= (pPwr / (ePwr * 0.8)) * 10; php -= (ePwr / (pPwr * 0.8)) * 10;
+                
+                ehp -= (pPwr / (ePwr * 0.8)) * 12; 
+                php -= (ePwr / (pPwr * 0.8)) * 12;
+                
                 document.getElementById('p-hp').style.width = Math.max(0, php) + "%";
                 document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
+                
                 if(ehp <= 0 || php <= 0) {
                     clearInterval(loop);
-                    if(ehp <= 0) { db.dia += 100; window.save(); alert("VICTORY! +100 💎"); } else { alert("DEFEAT!"); }
+                    if(ehp <= 0) { 
+                        db.dia += 100; window.save(); 
+                        log.innerHTML = "<b style='color:var(--green)'>VICTORY! +100 💎</b>";
+                        alert("VICTORY! +100 💎"); 
+                    } else { 
+                        log.innerHTML = "<b style='color:var(--red)'>DEFEAT!</b>";
+                        alert("DEFEAT!"); 
+                    }
                     btn.disabled = false;
                 }
             }, 800);
@@ -325,6 +370,7 @@
                 document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
                     <div class="card-item" style="background-image:url('${h.img}')">
                         <div class="rarity ${h.rar}">${h.rar}</div>
+                        <div class="type-badge type-${h.type}">${h.type}</div>
                         <div class="pwr-tag">PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div>
                         <div class="card-actions"><button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl} (${h.dupes}/5)</button></div>
                     </div>`).join('');
@@ -346,7 +392,11 @@
             }
 
             if(id === 'pvp') {
-                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `<div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative;"><div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div></div>`).join('');
+                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `
+                    <div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative;">
+                        <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
+                        <div class="type-badge type-${h.type}" style="font-size:0.4rem; top:2px; left:2px;">${h.type}</div>
+                    </div>`).join('');
             }
         };
 
@@ -362,6 +412,8 @@
             document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`;
             document.getElementById('p-rar').innerText = db.selected.rar;
             document.getElementById('p-rar').className = `rarity ${db.selected.rar}`;
+            document.getElementById('p-type-battle').innerText = db.selected.type;
+            document.getElementById('p-type-battle').className = `type-badge type-${db.selected.type}`;
             document.getElementById('p-pwr-val').innerText = `PWR: ${pwr.toLocaleString()}`;
             document.getElementById('btn-fight').disabled = false;
         };
