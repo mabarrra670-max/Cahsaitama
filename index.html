@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>One Punch Gacha: Online Leaderboard - Fixed Version</title>
+    <title>One Punch Gacha: Online Leaderboard - Ultimate Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* CSS ROOT VARIABLES */
+        /* =========================================
+           CSS ROOT & BASE STYLES
+           ========================================= */
         :root { 
             --gold: #ffd700; 
             --red: #ff4757; 
@@ -17,7 +19,6 @@
             --orange: #e67e22; 
         }
 
-        /* RESET & BASE STYLES */
         body { 
             margin: 0; 
             background: var(--dark); 
@@ -29,7 +30,7 @@
             overflow: hidden; 
         }
         
-        /* BACKGROUND & EFFECTS */
+        /* Background Video */
         #videoBg { 
             position: fixed; 
             inset: 0; 
@@ -51,7 +52,7 @@
             transition: 0.2s; 
         }
 
-        /* SCREENS & ANIMATIONS */
+        /* Screen Transitions */
         .screen { 
             flex: 1; 
             display: none; 
@@ -73,7 +74,7 @@
             transform: translateY(0); 
         }
 
-        /* INVENTORY GRID */
+        /* Inventory Grid System */
         #inv-grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -82,7 +83,7 @@
             padding-bottom: 20px; 
         }
 
-        /* CARD STYLING */
+        /* Card Component Styles */
         .rarity { 
             position: absolute; 
             top: 5px; 
@@ -166,7 +167,7 @@
             cursor: pointer; 
         }
 
-        /* BATTLE UI ELEMENTS */
+        /* Arena Battle Elements */
         .battle-log { 
             width: 100%; 
             height: 50px; 
@@ -204,7 +205,7 @@
             100%{transform:translateX(0)} 
         }
 
-        /* AUTH & HEADER */
+        /* Login & Header Bar */
         #login-screen { 
             position: fixed; 
             inset: 0; 
@@ -252,7 +253,7 @@
             font-weight: 600; 
         }
         
-        /* NAVIGATION BAR */
+        /* Navigation System */
         .nav { 
             position: fixed; 
             bottom: 0; 
@@ -288,7 +289,6 @@
             margin-bottom: 4px; 
         }
 
-        /* BUTTONS & HP BARS */
         .btn { 
             background: var(--red); 
             color: #fff; 
@@ -382,7 +382,7 @@
     <div id="shop" class="screen">
         <h3 style="font-family:'Bebas Neue'; color:var(--gold);">DAILY SUPPLY</h3>
         <button id="daily-btn" class="btn" style="background:var(--green);" onclick="window.claimDaily()">CLAIM 1000 💎</button>
-        <div id="daily-timer" style="font-size:0.9rem; color:var(--gold); margin-top:15px;"></div>
+        <div id="daily-timer" style="font-size:1.1rem; color:var(--gold); margin-top:15px; font-weight:bold; letter-spacing:1px;">READY TO CLAIM</div>
     </div>
 
     <div id="pvp" class="screen">
@@ -428,7 +428,6 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = { 
             apiKey: "AIzaSyAo3ztYZX8L9dK-K4dg6HZ7XuOJwp5JCTE", 
             authDomain: "gachasaitama.firebaseapp.com", 
@@ -443,259 +442,130 @@
         const db_fs = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // HERO MASTER DATA
+        /* MASTER DATA HERO - FIXED GAROU LINK */
         const heroPool = [
-            { id:1, name:"Saitama God", rar:"LR", rate:0.01, pwr:999999, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
-            { id:2, name:"Cosmic Garou", rar:"LR", rate:0.09, pwr:65000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png" },
-            { id:3, name:"Saitama", rar:"SSR", rate:0.5, pwr:50000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png" },
-            { id:4, name:"Tatsumaki", rar:"SSR", rate:1.0, pwr:42000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/tatsumaki.png" },
-            { id:5, name:"Garou", rar:"SSR", rate:1.2, pwr:40000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/garou.png" },
-            { id:6, name:"Atomic Samurai", rar:"SSR", rate:1.5, pwr:32000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/atomicsamurai.png" },
-            { id:8, name:"Bang", rar:"SSR", rate:1.8, pwr:31000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/bang.png" },
-            { id:9, name:"Genos", rar:"SR", rate:5.0, pwr:22000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/genos.png" },
-            { id:10, name:"Child Emperor", rar:"SR", rate:6.0, pwr:20000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/childemperor.png" },
-            { id:14, name:"Amai Mask", rar:"SR", rate:8.0, pwr:18000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/amaimask.png" },
-            { id:7, name:"Fubuki", rar:"SR", rate:10.0, pwr:15000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/fubuki.png" },
-            { id:13, name:"Mumen Rider", rar:"R", rate:64.9, pwr:1000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
+            { id:1, name:"Saitama God", rar:"LR", rate:0.01, pwr:999999, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/saitamagod.png" },
+            { id:2, name:"Cosmic Garou", rar:"LR", rate:0.09, pwr:65000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/cosmicgarou.png" },
+            { id:3, name:"Saitama", rar:"SSR", rate:0.5, pwr:50000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/saitama.png" },
+            { id:4, name:"Tatsumaki", rar:"SSR", rate:1.0, pwr:42000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/tatsumaki.png" },
+            { id:5, name:"Garou", rar:"SSR", rate:1.2, pwr:40000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/garou.png" },
+            { id:6, name:"Atomic Samurai", rar:"SSR", rate:1.5, pwr:32000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/atomicsamurai.png" },
+            { id:8, name:"Bang", rar:"SSR", rate:1.8, pwr:31000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/bang.png" },
+            { id:9, name:"Genos", rar:"SR", rate:5.0, pwr:22000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/genos.png" },
+            { id:10, name:"Child Emperor", rar:"SR", rate:6.0, pwr:20000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/childemperor.png" },
+            { id:14, name:"Amai Mask", rar:"SR", rate:8.0, pwr:18000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/amaimask.png" },
+            { id:7, name:"Fubuki", rar:"SR", rate:10.0, pwr:15000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/fubuki.png" },
+            { id:13, name:"Mumen Rider", rar:"R", rate:64.9, pwr:1000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/mumenrider.png" }
         ];
 
-        // LOAD DATA
         let db = JSON.parse(localStorage.getItem('OPG_POWER_FIX')) || { 
-            name:"PLAYER", 
-            id: "OPG-TEMP", 
-            dia:5000, 
-            inv:[], 
-            selected:null, 
-            lastClaim:0, 
-            pity:0 
+            name:"PLAYER", id: "OPG-TEMP", dia:5000, inv:[], selected:null, lastClaim:0, pity:0 
         };
 
-        // --- MIGRATION SYSTEM (MENCEGAH UNDEFINED & FIX GAMBAR) ---
+        /* AUTOMATIC DATA CORRECTION (MIGRATION) */
         db.inv = db.inv.map(item => {
             const master = heroPool.find(h => h.id === item.id);
             if(master) {
-                if(!item.type || item.type === "UNDEFINED") {
-                    item.type = master.type;
-                }
-                // Paksa update gambar jika link lama rusak
-                item.img = master.img;
+                if(!item.type || item.type === "UNDEFINED") item.type = master.type;
+                item.img = master.img; // Force update links
             }
             return item;
         });
 
-        // LOGIN HANDLERS
         window.loginGoogle = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
+        onAuthStateChanged(auth, (user) => { if (user) { document.getElementById('login-screen').style.display = 'none'; db.name = user.displayName.split(' ')[0].toUpperCase(); db.uid = user.uid; db.id = "OPG-" + user.uid.substring(0, 5).toUpperCase(); window.save(); } });
 
-        onAuthStateChanged(auth, (user) => { 
-            if (user) { 
-                document.getElementById('login-screen').style.display = 'none'; 
-                db.name = user.displayName.split(' ')[0].toUpperCase(); 
-                db.uid = user.uid; 
-                db.id = "OPG-" + user.uid.substring(0, 5).toUpperCase(); 
-                window.save(); 
-            } 
-        });
-
-        // SAVE & SYNC FUNCTION
         window.save = async () => {
             localStorage.setItem('OPG_POWER_FIX', JSON.stringify(db));
             document.getElementById('p-dia').innerText = db.dia.toLocaleString();
             document.getElementById('p-name').innerText = db.name;
             document.getElementById('p-id').innerText = "ID: " + db.id;
             document.getElementById('pity-count').innerText = db.pity;
-            
             if(db.uid) {
                 let totalPwr = db.inv.reduce((sum, h) => sum + (h.pwr * Math.pow(h.lvl, 1.5)), 0);
-                try { 
-                    await setDoc(doc(db_fs, "leaderboard", db.uid), { 
-                        name: db.name, 
-                        pwr: Math.floor(totalPwr), 
-                        id: db.id 
-                    }); 
-                } catch(e) { console.log("Firebase sync fail"); }
+                try { await setDoc(doc(db_fs, "leaderboard", db.uid), { name: db.name, pwr: Math.floor(totalPwr), id: db.id }); } catch(e) {}
             }
         };
 
-        // GACHA LOGIC
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
             const flash = document.getElementById('flash-effect');
             let res = [], hasBest = false;
-
             for(let i=0; i<t; i++){
                 db.pity++;
                 let rolled;
-                if(db.pity >= 50) { 
-                    rolled = heroPool[Math.floor(Math.random() * 2)]; 
-                    db.pity = 0; 
-                } else {
+                if(db.pity >= 50) { rolled = heroPool[Math.floor(Math.random() * 2)]; db.pity = 0; }
+                else {
                     let r = Math.random()*100, cur=0;
-                    for(let h of heroPool){ 
-                        cur+=h.rate; 
-                        if(r<=cur){ rolled=h; break; } 
-                    }
+                    for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
                     if(!rolled) rolled = heroPool[heroPool.length-1];
                     if(rolled.rar === "LR" || rolled.rar === "SSR") hasBest = true;
                     if(rolled.rar === "LR") db.pity = 0;
                 }
                 res.push(rolled);
                 let o = db.inv.find(x => x.id === rolled.id);
-                if(o) { 
-                    o.dupes++; 
-                    o.type = rolled.type; 
-                    o.img = rolled.img; 
-                } else {
-                    db.inv.push({...rolled, lvl:1, dupes:0});
-                }
+                if(o) { o.dupes++; o.type = rolled.type; o.img = rolled.img; } else db.inv.push({...rolled, lvl:1, dupes:0});
             }
-
             flash.style.background = hasBest ? "gold" : "white";
-            flash.style.opacity = '1'; 
-            setTimeout(() => flash.style.opacity = '0', 200);
+            flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 200);
             window.save();
-
             if(t===1){
-                document.getElementById('multi-view').style.display='none'; 
-                document.getElementById('single-view').style.display='block';
+                document.getElementById('multi-view').style.display='none'; document.getElementById('single-view').style.display='block';
                 document.getElementById('card-img').style.backgroundImage = `url('${res[0].img}')`;
-                document.getElementById('gacha-rarity').innerText = res[0].rar; 
-                document.getElementById('gacha-rarity').className = `rarity ${res[0].rar}`;
-                document.getElementById('gacha-type').innerText = res[0].type; 
-                document.getElementById('gacha-type').className = `type-badge type-${res[0].type}`;
-                const cardBox = document.getElementById('card-box'); 
-                cardBox.style.transform = "rotateY(180deg)";
+                document.getElementById('gacha-rarity').innerText = res[0].rar; document.getElementById('gacha-rarity').className = `rarity ${res[0].rar}`;
+                document.getElementById('gacha-type').innerText = res[0].type; document.getElementById('gacha-type').className = `type-badge type-${res[0].type}`;
+                const cardBox = document.getElementById('card-box'); cardBox.style.transform = "rotateY(180deg)";
                 setTimeout(()=> cardBox.style.transform="rotateY(0deg)", 2000);
             } else {
-                document.getElementById('single-view').style.display='none'; 
-                document.getElementById('multi-view').style.display='grid';
-                document.getElementById('multi-view').innerHTML = res.map(h => `
-                    <div class="card-item">
-                        <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
-                        <div class="type-badge type-${h.type}" style="font-size:0.4rem; top:3px; left:3px;">${h.type}</div>
-                        <img src="${h.img}" style="width:100%; height:100%; object-fit:cover;">
-                    </div>`).join('');
+                document.getElementById('single-view').style.display='none'; document.getElementById('multi-view').style.display='grid';
+                document.getElementById('multi-view').innerHTML = res.map(h => `<div class="card-item"><div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div><div class="type-badge type-${h.type}" style="font-size:0.4rem; top:3px; left:3px;">${h.type}</div><img src="${h.img}" style="width:100%; height:100%; object-fit:cover;"></div>`).join('');
             }
         };
 
-        // BATTLE LOGIC
         window.startBattle = () => {
             if(!db.selected) return;
-            const btn = document.getElementById('btn-fight'); 
-            btn.disabled = true;
+            const btn = document.getElementById('btn-fight'); btn.disabled = true;
             let enemy = heroPool[Math.floor(Math.random()*heroPool.length)];
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
-            
-            // Elemen Advantage
-            if((db.selected.type === "Physical" && enemy.type === "Tactics") || 
-               (db.selected.type === "Tactics" && enemy.type === "Energy") || 
-               (db.selected.type === "Energy" && enemy.type === "Physical")) {
-                pPwr *= 1.3;
-            }
-
+            if((db.selected.type === "Physical" && enemy.type === "Tactics") || (db.selected.type === "Tactics" && enemy.type === "Energy") || (db.selected.type === "Energy" && enemy.type === "Physical")) pPwr *= 1.3;
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
-            document.getElementById('e-rar').innerText = enemy.rar; 
-            document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
-            document.getElementById('e-type-battle').innerText = enemy.type; 
-            document.getElementById('e-type-battle').className = `type-badge type-${enemy.type}`;
-            
+            document.getElementById('e-rar').innerText = enemy.rar; document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
+            document.getElementById('e-type-battle').innerText = enemy.type; document.getElementById('e-type-battle').className = `type-badge type-${enemy.type}`;
             let php = 100, ehp = 100;
             const loop = setInterval(() => {
-                document.getElementById('e-fighter').classList.add('hit-anim'); 
-                document.getElementById('p-fighter').classList.add('hit-anim');
-                setTimeout(() => { 
-                    document.getElementById('e-fighter').classList.remove('hit-anim'); 
-                    document.getElementById('p-fighter').classList.remove('hit-anim'); 
-                }, 200);
-                
-                ehp -= (pPwr / (ePwr * 0.8)) * 12; 
-                php -= (ePwr / (pPwr * 0.8)) * 12;
-                
-                document.getElementById('p-hp').style.width = Math.max(0, php) + "%"; 
-                document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
-                
-                if(ehp <= 0 || php <= 0) { 
-                    clearInterval(loop); 
-                    if(ehp <= 0) { 
-                        db.dia += 100; 
-                        window.save(); 
-                        alert("VICTORY!"); 
-                    } else { 
-                        alert("DEFEAT!"); 
-                    } 
-                    btn.disabled = false; 
-                }
+                document.getElementById('e-fighter').classList.add('hit-anim'); document.getElementById('p-fighter').classList.add('hit-anim');
+                setTimeout(() => { document.getElementById('e-fighter').classList.remove('hit-anim'); document.getElementById('p-fighter').classList.remove('hit-anim'); }, 200);
+                ehp -= (pPwr / (ePwr * 0.8)) * 12; php -= (ePwr / (pPwr * 0.8)) * 12;
+                document.getElementById('p-hp').style.width = Math.max(0, php) + "%"; document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
+                if(ehp <= 0 || php <= 0) { clearInterval(loop); if(ehp <= 0) { db.dia += 100; window.save(); alert("WIN!"); } else alert("LOSE!"); btn.disabled = false; }
             }, 800);
         };
 
-        // NAVIGATION LOGIC
         window.nav = async (id, el) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); 
-            el.classList.add('active');
-
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
             if(id === 'profil') {
-                document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
-                    <div class="card-item" style="background-image:url('${h.img}')">
-                        <div class="rarity ${h.rar}">${h.rar}</div>
-                        <div class="type-badge type-${h.type || 'Physical'}">${h.type || 'Physical'}</div>
-                        <div class="pwr-tag">PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div>
-                        <div class="card-actions">
-                            <button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl}</button>
-                        </div>
-                    </div>`).join('');
+                document.getElementById('inv-grid').innerHTML = db.inv.map(h => `<div class="card-item" style="background-image:url('${h.img}')"><div class="rarity ${h.rar}">${h.rar}</div><div class="type-badge type-${h.type || 'Physical'}">${h.type || 'Physical'}</div><div class="pwr-tag">PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div><div class="card-actions"><button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl}</button></div></div>`).join('');
             }
-
             if(id === 'leaderboard') {
                 const q = query(collection(db_fs, "leaderboard"), orderBy("pwr", "desc"), limit(10));
                 const snap = await getDocs(q);
-                let html = ""; 
-                let rank = 1;
-                snap.forEach(doc => { 
-                    let d = doc.data(); 
-                    html += `<div style="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between;">
-                        <span><b>${rank}.</b> ${d.name}</span>
-                        <b style="color:var(--gold);">${d.pwr.toLocaleString()}</b>
-                    </div>`; 
-                    rank++; 
-                });
+                let html = ""; let rank = 1;
+                snap.forEach(doc => { let d = doc.data(); html += `<div style="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between;"><span><b>${rank}.</b> ${d.name}</span><b style="color:var(--gold);">${d.pwr.toLocaleString()}</b></div>`; rank++; });
                 document.getElementById('rank-list').innerHTML = html;
             }
-
             if(id === 'pvp') {
-                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `
-                    <div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative;">
-                        <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
-                        <div class="type-badge type-${h.type || 'Physical'}" style="font-size:0.4rem; top:2px; left:2px;">${h.type || 'Physical'}</div>
-                    </div>`).join('');
+                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `<div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative;"><div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div><div class="type-badge type-${h.type || 'Physical'}" style="font-size:0.4rem; top:2px; left:2px;">${h.type || 'Physical'}</div></div>`).join('');
             }
         };
 
-        // HELPER FUNCTIONS
-        window.upHero = (id) => { 
-            let h = db.inv.find(x => x.id === id); 
-            if(h.dupes >= 5) { 
-                h.dupes -= 5; 
-                h.lvl++; 
-                window.save(); 
-                window.nav('profil', document.querySelectorAll('.nav-item')[4]); 
-            } else { 
-                alert("Butuh 5 kartu yang sama untuk naik level!"); 
-            } 
-        };
-
-        window.prep = (id) => { 
-            db.selected = db.inv.find(x => x.id === id); 
-            document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`; 
-            document.getElementById('p-rar').innerText = db.selected.rar; 
-            document.getElementById('p-rar').className = `rarity ${db.selected.rar}`; 
-            document.getElementById('p-type-battle').innerText = db.selected.type; 
-            document.getElementById('p-type-battle').className = `type-badge type-${db.selected.type}`; 
-            document.getElementById('btn-fight').disabled = false; 
-        };
-
+        window.upHero = (id) => { let h = db.inv.find(x => x.id === id); if(h.dupes >= 5) { h.dupes -= 5; h.lvl++; window.save(); window.nav('profil', document.querySelectorAll('.nav-item')[4]); } else alert("Need 5 dupes!"); };
+        window.prep = (id) => { db.selected = db.inv.find(x => x.id === id); document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`; document.getElementById('p-rar').innerText = db.selected.rar; document.getElementById('p-rar').className = `rarity ${db.selected.rar}`; document.getElementById('p-type-battle').innerText = db.selected.type; document.getElementById('p-type-battle').className = `type-badge type-${db.selected.type}`; document.getElementById('btn-fight').disabled = false; };
+        
+        /* FIXED DAILY TIMER LOGIC */
         window.claimDaily = () => { 
             let now = Date.now(); 
             if (now - db.lastClaim >= 86400000) { 
@@ -703,33 +573,35 @@
                 db.lastClaim = now; 
                 window.save(); 
                 alert("Claimed 1000 Diamonds!"); 
-            } else { 
-                alert("Belum waktunya claim!"); 
-            }
+            } 
         };
 
         function updateDailyStatus() { 
             let btn = document.getElementById('daily-btn'); 
-            if(!btn) return; 
+            let timerDisplay = document.getElementById('daily-timer');
+            if(!btn || !timerDisplay) return; 
+
             let diff = Date.now() - db.lastClaim; 
-            if (diff < 86400000) { btn.disabled = true; } 
-            else { btn.disabled = false; } 
+            let remaining = 86400000 - diff;
+
+            if (remaining > 0) { 
+                btn.disabled = true; 
+                btn.style.opacity = "0.5";
+                let hours = Math.floor(remaining / 3600000);
+                let mins = Math.floor((remaining % 3600000) / 60000);
+                let secs = Math.floor((remaining % 60000) / 1000);
+                timerDisplay.innerText = `NEXT CLAIM: ${hours}h ${mins}m ${secs}s`;
+            } else { 
+                btn.disabled = false; 
+                btn.style.opacity = "1";
+                timerDisplay.innerText = "READY TO CLAIM!";
+            } 
         }
 
         setInterval(updateDailyStatus, 1000);
-
-        window.initAudio = () => { 
-            let v = document.getElementById('videoBg'); 
-            if(v) { v.muted = false; v.play().catch(()=>{}); } 
-        };
-
-        window.changeName = () => { 
-            let n = prompt("Ganti nama hero?"); 
-            if(n) { db.name = n.toUpperCase(); window.save(); } 
-        };
-
-        // INITIALIZE
+        window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play().catch(()=>{}); } };
+        window.changeName = () => { let n = prompt("Name?"); if(n) { db.name = n.toUpperCase(); window.save(); } };
         window.save();
     </script>
 </body>
-    </html>
+                    </html>
