@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>One Punch Gacha: Final Version</title>
+    <title>One Punch Gacha: Online Leaderboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd700; --red: #ff4757; --dark: #0a0a0a; --green: #2ecc71; --purple: #a020f0; --blue: #3498db; --orange: #e67e22; }
@@ -40,7 +40,7 @@
 
     <div id="login-screen">
         <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem;">ONE PUNCH GACHA</h1>
-        <p style="color:#aaa; margin-bottom:20px;">Sign in to Save your Progress</p>
+        <p style="color:#aaa; margin-bottom:20px;">Sign in to Compete Globally</p>
         <button class="login-btn" onclick="window.loginGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
             Sign in with Google
@@ -108,8 +108,10 @@
     </div>
 
     <div id="leaderboard" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">LEADERBOARD</h3>
-        <div id="rank-list" style="width:100%; background:#111; border:1px solid var(--gold); border-radius:10px;"></div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">GLOBAL LEADERBOARD</h3>
+        <div id="rank-list" style="width:100%; background:#111; border:1px solid var(--gold); border-radius:10px;">
+            <div style="padding:20px; text-align:center; color:#888;">Loading ranking...</div>
+        </div>
     </div>
 
     <div id="profil" class="screen">
@@ -128,6 +130,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAo3ztYZX8L9dK-K4dg6HZ7XuOJwp5JCTE",
@@ -141,6 +144,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db_fs = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
         const heroPool = [
@@ -157,6 +161,7 @@
             name:"PLAYER", id: "OPG-TEMP", dia:5000, inv:[], selected:null, lastClaim:0, pity:0 
         };
 
+        // LOGIN SYSTEM
         window.loginGoogle = () => {
             signInWithPopup(auth, provider).catch(e => alert("Login Error: " + e.message));
         };
@@ -165,6 +170,7 @@
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 db.name = user.displayName.split(' ')[0].toUpperCase();
+                db.uid = user.uid; // Simpan UID asli untuk database
                 db.id = "OPG-" + user.uid.substring(0, 5).toUpperCase();
                 window.save();
             } else {
@@ -172,24 +178,34 @@
             }
         });
 
-        window.save = () => {
+        // SAVE & ONLINE SYNC
+        window.save = async () => {
             localStorage.setItem('OPG_POWER_FIX', JSON.stringify(db));
             document.getElementById('p-dia').innerText = db.dia.toLocaleString();
             document.getElementById('p-name').innerText = db.name;
             document.getElementById('p-id').innerText = "ID: " + db.id;
             document.getElementById('pity-count').innerText = db.pity;
             updateDailyStatus();
+
+            // Kirim data ke Leaderboard Firestore
+            if(db.uid) {
+                let totalPwr = db.inv.reduce((sum, h) => sum + (h.pwr * Math.pow(h.lvl, 1.5)), 0);
+                try {
+                    await setDoc(doc(db_fs, "leaderboard", db.uid), {
+                        name: db.name,
+                        pwr: Math.floor(totalPwr),
+                        id: db.id
+                    });
+                } catch(e) { console.error("Leaderboard Sync Failed", e); }
+            }
         };
 
-        window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play(); } };
-
+        // GACHA SYSTEM
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
-
-            // FIX SFX GACHA
             const sfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
-            sfx.play().catch(e => console.log("Audio play blocked"));
+            sfx.play().catch(e => {});
 
             let res = [];
             for(let i=0; i<t; i++){
@@ -222,6 +238,7 @@
             }
         };
 
+        // BATTLE SYSTEM
         window.startBattle = () => {
             if(!db.selected) return alert("Pilih Hero dulu!");
             document.getElementById('btn-fight').disabled = true;
@@ -229,13 +246,12 @@
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
-            document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
             document.getElementById('e-rar').innerText = enemy.rar;
+            document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
             document.getElementById('e-pwr-val').innerText = `PWR: ${ePwr.toLocaleString()}`;
             let php = 100, ehp = 100;
             const loop = setInterval(() => {
-                const hit = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-                hit.play().catch(e => {});
+                const hit = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); hit.play().catch(()=>{});
                 ehp -= (pPwr / ePwr) * 15; php -= (ePwr / pPwr) * 15;
                 document.getElementById('p-hp').style.width = Math.max(0, php) + "%";
                 document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
@@ -247,29 +263,42 @@
             }, 600);
         };
 
-        window.nav = (id, el) => {
+        // NAVIGATION & ONLINE LEADERBOARD LOAD
+        window.nav = async (id, el) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active'); el.classList.add('active');
+            
             if(id === 'profil') {
                 document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
                     <div class="card-item" style="background-image:url('${h.img}')">
                         <div class="rarity ${h.rar}">${h.rar}</div>
                         <div class="pwr-tag">PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div>
-                        <div class="card-actions">
-                            <button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl} (${h.dupes}/5)</button>
-                        </div>
+                        <div class="card-actions"><button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl} (${h.dupes}/5)</button></div>
                     </div>`).join('');
             }
+
             if(id === 'leaderboard') {
-                let totalPwr = db.inv.reduce((sum, h) => sum + (h.pwr * Math.pow(h.lvl, 1.5)), 0);
-                document.getElementById('rank-list').innerHTML = `<div style="padding:15px; background:rgba(255,215,0,0.1);">1. ${db.name} (ID: ${db.id}) - ${Math.floor(totalPwr).toLocaleString()}</div>`;
+                const q = query(collection(db_fs, "leaderboard"), orderBy("pwr", "desc"), limit(10));
+                const snap = await getDocs(q);
+                let html = ""; let rank = 1;
+                snap.forEach(doc => {
+                    let d = doc.data();
+                    html += `<div style="padding:12px; border-bottom:1px solid #333; display:flex; justify-content:space-between; ${d.id === db.id ? 'background:rgba(255,215,0,0.1);' : ''}">
+                        <span>${rank}. ${d.name} <small style="color:#666;">${d.id}</small></span>
+                        <b style="color:var(--gold);">${d.pwr.toLocaleString()}</b>
+                    </div>`;
+                    rank++;
+                });
+                document.getElementById('rank-list').innerHTML = html || '<div style="padding:20px; text-align:center;">No data yet.</div>';
             }
+
             if(id === 'pvp') {
                 document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `<div onclick="window.prep(${h.id})" style="min-width:70px; height:95px; background-image:url('${h.img}'); background-size:cover; border:1px solid #555; border-radius:5px; position:relative;"><div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div></div>`).join('');
             }
         };
 
+        // UTILITIES
         window.upHero = (id) => {
             let h = db.inv.find(x => x.id === id);
             if(h.dupes >= 5) { h.dupes -= 5; h.lvl++; window.save(); window.nav('profil', document.querySelectorAll('.nav-item')[4]); }
@@ -288,7 +317,7 @@
 
         window.claimDaily = () => {
             let now = Date.now();
-            if (now - db.lastClaim >= 86400000) { db.dia += 1000; db.lastClaim = now; window.save(); alert("Diamond Claimed!"); }
+            if (now - db.lastClaim >= 86400000) { db.dia += 1000; db.lastClaim = now; window.save(); alert("Daily Claimed!"); }
         };
 
         function updateDailyStatus() {
@@ -304,8 +333,10 @@
         }
         setInterval(updateDailyStatus, 1000);
 
+        window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play(); } };
         window.changeName = () => { let n = prompt("Ganti Nama?"); if(n) { db.name = n.toUpperCase(); window.save(); } };
+
         window.save();
     </script>
 </body>
-                                                                </html>
+    </html>
