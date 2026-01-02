@@ -9,11 +9,9 @@
         :root { --gold: #ffd700; --red: #ff4757; --dark: #0a0a0a; --green: #2ecc71; --purple: #a020f0; --blue: #3498db; --orange: #e67e22; }
         body { margin: 0; background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Efek Latar Belakang */
         #videoBg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.25); pointer-events: none; }
         #flash-effect { position: fixed; inset: 0; background: white; opacity: 0; z-index: 10000; pointer-events: none; transition: 0.2s; }
 
-        /* UI Screens & Animations */
         .screen { 
             flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; 
             overflow-y: auto; padding-bottom: 110px; z-index: 5;
@@ -21,7 +19,6 @@
         }
         .screen.active { display: flex; opacity: 1; transform: translateY(0); }
 
-        /* Card Visuals */
         .rarity { position: absolute; top: 5px; right: 5px; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; font-family: 'Bebas Neue'; z-index: 5; }
         .LR { background: linear-gradient(45deg, #ff0000, #ffd700); color: #fff; box-shadow: 0 0 15px #f00; animation: glow-lr 1s infinite alternate; }
         .SSR { background: var(--gold); color: #000; box-shadow: 0 0 10px var(--gold); }
@@ -33,25 +30,21 @@
         .card-item { position: relative; aspect-ratio: 2/3; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; transition: 0.3s; }
         .card-item:hover { transform: scale(1.05); z-index: 2; border-color: var(--gold); }
 
-        /* Battle UI */
         .battle-log { width: 100%; height: 50px; background: rgba(0,0,0,0.6); margin-top: 10px; border-radius: 8px; font-size: 0.75rem; padding: 5px; overflow: hidden; color: #ccc; border: 1px solid #333; }
         .fighter-box { height: 140px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; background-color: #111; position: relative; transition: 0.2s; }
         .hit-anim { animation: shake 0.2s; border-color: var(--red); }
         @keyframes shake { 0%{transform:translateX(0)} 25%{transform:translateX(5px)} 50%{transform:translateX(-5px)} 100%{transform:translateX(0)} }
 
-        /* Login & Header */
         #login-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .login-btn { background: #fff; color: #333; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
         .header { padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 10; backdrop-filter: blur(5px); }
         .diamond-pill { background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: 600; box-shadow: inset 0 0 10px rgba(255,215,0,0.2); }
         
-        /* Navigation */
         .nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: rgba(10,10,10,0.95); display: flex; border-top: 1px solid #333; z-index: 100; backdrop-filter: blur(10px); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
         .nav-item.active { color: var(--gold); transform: translateY(-5px); }
         .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }
 
-        /* Buttons */
         .btn { background: var(--red); color: #fff; border: none; padding: 12px; border-radius: 12px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 0 #800; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #800; }
         .btn:disabled { background: #444; color: #888; box-shadow: none; }
@@ -124,7 +117,7 @@
         <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.8rem;">BATTLE ARENA</h3>
         <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px; padding:10px; background:rgba(0,0,0,0.4); border-radius:15px; border:1px solid #333;"></div>
         
-        <div style="width:100%; background:rgba(0,0,0,0.8); padding:15px; border-radius:15px; border:1px solid #444; margin-top:15px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+        <div style="width:100%; background:rgba(0,0,0,0.8); padding:15px; border-radius:15px; border:1px solid #444; margin-top:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="text-align:center; width:45%;">
                     <div id="p-fighter" class="fighter-box"><div id="p-rar" class="rarity"></div></div>
@@ -189,10 +182,15 @@
             { id:1, name:"Saitama God", rar:"LR", rate:0.01, pwr:999999, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
             { id:2, name:"Cosmic Garou", rar:"LR", rate:0.09, pwr:65000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png" },
             { id:3, name:"Saitama", rar:"SSR", rate:0.5, pwr:50000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png" },
+            { id:4, name:"Tatsumaki", rar:"SSR", rate:1.0, pwr:42000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/tatsumaki.png" },
+            { id:5, name:"Garou", rar:"SSR", rate:1.2, pwr:40000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/garou.png" },
             { id:6, name:"Atomic Samurai", rar:"SSR", rate:1.5, pwr:32000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/atomicsamurai.png" },
-            { id:14, name:"Amai Mask", rar:"SR", rate:5.0, pwr:18000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/amaimask.png" },
+            { id:8, name:"Bang", rar:"SSR", rate:1.8, pwr:31000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/bang.png" },
+            { id:9, name:"Genos", rar:"SR", rate:5.0, pwr:22000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/genos.png" },
+            { id:10, name:"Child Emperor", rar:"SR", rate:6.0, pwr:20000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/childemperor.png" },
+            { id:14, name:"Amai Mask", rar:"SR", rate:8.0, pwr:18000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/amaimask.png" },
             { id:7, name:"Fubuki", rar:"SR", rate:10.0, pwr:15000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/fubuki.png" },
-            { id:13, name:"Mumen Rider", rar:"R", rate:82.9, pwr:1000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
+            { id:13, name:"Mumen Rider", rar:"R", rate:64.9, pwr:1000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
         ];
 
         let db = JSON.parse(localStorage.getItem('OPG_POWER_FIX')) || { 
@@ -235,12 +233,10 @@
             }
         };
 
-        // ENHANCED GACHA
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
             
-            // Efek Flash & Suara
             const flash = document.getElementById('flash-effect');
             flash.style.opacity = '1';
             setTimeout(() => flash.style.opacity = '0', 150);
@@ -249,8 +245,6 @@
             sfx.play().catch(e => {});
 
             let res = [];
-            let hasLR = false;
-
             for(let i=0; i<t; i++){
                 db.pity++;
                 let rolled;
@@ -259,7 +253,7 @@
                     let r = Math.random()*100, cur=0;
                     for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
                     if(!rolled) rolled = heroPool[heroPool.length-1];
-                    if(rolled.rar === "LR") { db.pity = 0; hasLR = true; }
+                    if(rolled.rar === "LR") db.pity = 0;
                 }
                 res.push(rolled);
                 let o = db.inv.find(x => x.id === rolled.id);
@@ -273,7 +267,6 @@
                 document.getElementById('card-img').style.backgroundImage = `url('${res[0].img}')`;
                 document.getElementById('gacha-rarity').innerText = res[0].rar;
                 document.getElementById('gacha-rarity').className = `rarity ${res[0].rar}`;
-                
                 const cardBox = document.getElementById('card-box');
                 cardBox.style.transform = "rotateY(180deg)";
                 setTimeout(()=> cardBox.style.transform="rotateY(0deg)", 2000);
@@ -281,14 +274,13 @@
                 document.getElementById('single-view').style.display='none';
                 document.getElementById('multi-view').style.display='grid';
                 document.getElementById('multi-view').innerHTML = res.map(h => `
-                    <div class="card-item card-appear">
+                    <div class="card-item">
                         <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
                         <img src="${h.img}" style="width:100%; height:100%; object-fit:cover;">
                     </div>`).join('');
             }
         };
 
-        // ENHANCED BATTLE
         window.startBattle = () => {
             if(!db.selected) return alert("Pilih Hero dulu!");
             const btn = document.getElementById('btn-fight');
@@ -311,7 +303,6 @@
                 const hitSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); 
                 hitSfx.play().catch(()=>{});
 
-                // Hit Animation
                 document.getElementById('e-fighter').classList.add('hit-anim');
                 document.getElementById('p-fighter').classList.add('hit-anim');
                 setTimeout(() => {
@@ -324,19 +315,14 @@
 
                 document.getElementById('p-hp').style.width = Math.max(0, php) + "%";
                 document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
-                
-                log.innerText = `Exchange blows... HP: ${Math.floor(php)}% VS ${Math.floor(ehp)}%`;
+                log.innerText = `Exchanging Blows... Player HP: ${Math.floor(php)}%`;
 
                 if(ehp <= 0 || php <= 0) {
                     clearInterval(loop);
                     if(ehp <= 0) { 
                         db.dia += 100; window.save(); 
-                        log.innerText = "VICTORY! Received 100 Diamonds!";
                         alert("VICTORY! +100 💎"); 
-                    } else { 
-                        log.innerText = "DEFEAT! Train harder!";
-                        alert("DEFEAT!"); 
-                    }
+                    } else { alert("DEFEAT!"); }
                     btn.disabled = false;
                 }
             }, 800);
@@ -345,10 +331,7 @@
         window.nav = async (id, el) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            const target = document.getElementById(id);
-            target.classList.add('active'); 
-            el.classList.add('active');
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
             
             if(id === 'profil') {
                 document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
@@ -371,11 +354,11 @@
                     </div>`;
                     rank++;
                 });
-                document.getElementById('rank-list').innerHTML = html || '<div style="padding:20px; text-align:center;">No data yet.</div>';
+                document.getElementById('rank-list').innerHTML = html || '<div style="padding:20px; text-align:center;">No data...</div>';
             }
 
             if(id === 'pvp') {
-                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `<div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative; cursor:pointer;"><div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div></div>`).join('');
+                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `<div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative;"><div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div></div>`).join('');
             }
         };
 
@@ -408,22 +391,15 @@
                 btn.disabled = true;
                 let rem = 86400000 - diff;
                 let h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
-                document.getElementById('daily-timer').innerText = `NEXT CLAIM IN: ${h}h ${m}m ${s}s`;
-            } else { btn.disabled = false; document.getElementById('daily-timer').innerText = "DAILY REWARD READY!"; }
+                document.getElementById('daily-timer').innerText = `NEXT: ${h}h ${m}m ${s}s`;
+            } else { btn.disabled = false; document.getElementById('daily-timer').innerText = "READY!"; }
         }
         setInterval(updateDailyStatus, 1000);
 
-        window.initAudio = () => { 
-            let v = document.getElementById('videoBg'); 
-            if(v) { v.muted = false; v.play().catch(()=>{}); } 
-        };
-        
-        window.changeName = () => { 
-            let n = prompt("Enter Hero Name:"); 
-            if(n) { db.name = n.toUpperCase(); window.save(); } 
-        };
+        window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play().catch(()=>{}); } };
+        window.changeName = () => { let n = prompt("Hero Name?"); if(n) { db.name = n.toUpperCase(); window.save(); } };
 
         window.save();
     </script>
 </body>
-                        </html>
+                </html>
