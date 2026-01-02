@@ -12,12 +12,25 @@
         #videoBg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.25); pointer-events: none; }
         #flash-effect { position: fixed; inset: 0; background: white; opacity: 0; z-index: 10000; pointer-events: none; transition: 0.2s; }
 
+        /* PERBAIKAN: Padding bawah ditambah agar tidak tertutup NAV */
         .screen { 
             flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; 
-            overflow-y: auto; padding-bottom: 110px; z-index: 5;
+            overflow-y: auto; 
+            padding-bottom: 120px; /* Ditambah agar hero paling bawah terlihat jelas */
+            z-index: 5;
             opacity: 0; transform: translateY(15px); transition: 0.4s ease;
+            -webkit-overflow-scrolling: touch;
         }
         .screen.active { display: flex; opacity: 1; transform: translateY(0); }
+
+        /* PERBAIKAN: Merapikan Grid Koleksi */
+        #inv-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+            width: 100%; 
+            padding-bottom: 20px; /* Extra space di dalam grid */
+        }
 
         .rarity { position: absolute; top: 5px; right: 5px; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; font-family: 'Bebas Neue'; z-index: 5; }
         .LR { background: linear-gradient(45deg, #ff0000, #ffd700); color: #fff; box-shadow: 0 0 15px #f00; animation: glow-lr 1s infinite alternate; }
@@ -28,7 +41,9 @@
         @keyframes glow-lr { from { box-shadow: 0 0 10px #f00; } to { box-shadow: 0 0 25px #ff0; } }
 
         .card-item { position: relative; aspect-ratio: 2/3; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; transition: 0.3s; }
-        .card-item:hover { transform: scale(1.05); z-index: 2; border-color: var(--gold); }
+        .pwr-tag { position: absolute; bottom: 45px; width: 100%; background: rgba(0,0,0,0.85); color: var(--gold); font-size: 0.65rem; text-align: center; font-weight: 600; padding: 2px 0; }
+        .card-actions { position: absolute; bottom: 0; width: 100%; display: flex; }
+        .up-btn { flex: 2; background: var(--green); border: none; color: #fff; font-size: 0.7rem; padding: 5px 0; font-family: 'Bebas Neue'; cursor: pointer; }
 
         .battle-log { width: 100%; height: 50px; background: rgba(0,0,0,0.6); margin-top: 10px; border-radius: 8px; font-size: 0.75rem; padding: 5px; overflow: hidden; color: #ccc; border: 1px solid #333; }
         .fighter-box { height: 140px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; background-color: #111; position: relative; transition: 0.2s; }
@@ -38,20 +53,15 @@
         #login-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .login-btn { background: #fff; color: #333; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
         .header { padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 10; backdrop-filter: blur(5px); }
-        .diamond-pill { background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: 600; box-shadow: inset 0 0 10px rgba(255,215,0,0.2); }
+        .diamond-pill { background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: 600; }
         
-        .nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: rgba(10,10,10,0.95); display: flex; border-top: 1px solid #333; z-index: 100; backdrop-filter: blur(10px); }
+        /* Navigasi tetap sama tapi layar sekarang punya padding lebih */
+        .nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(10,10,10,0.95); display: flex; border-top: 1px solid #333; z-index: 100; backdrop-filter: blur(10px); padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
         .nav-item.active { color: var(--gold); transform: translateY(-5px); }
         .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }
 
         .btn { background: var(--red); color: #fff; border: none; padding: 12px; border-radius: 12px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 0 #800; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #800; }
-        .btn:disabled { background: #444; color: #888; box-shadow: none; }
-
-        .pwr-tag { position: absolute; bottom: 45px; width: 100%; background: rgba(0,0,0,0.85); color: var(--gold); font-size: 0.65rem; text-align: center; font-weight: 600; padding: 2px 0; }
-        .card-actions { position: absolute; bottom: 0; width: 100%; display: flex; }
-        .up-btn { flex: 2; background: var(--green); border: none; color: #fff; font-size: 0.7rem; padding: 5px 0; font-family: 'Bebas Neue'; cursor: pointer; }
         .hp-bar { width: 100%; height: 8px; background: #333; margin-top: 8px; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
         .hp-fill { height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); width: 100%; transition: 0.3s; }
         .battle-pwr-label { font-size: 0.75rem; color: var(--gold); font-weight: 600; margin-top: 4px; display: block; }
@@ -64,7 +74,7 @@
 
     <div id="login-screen">
         <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem; text-shadow: 0 0 20px rgba(255,215,0,0.5);">ONE PUNCH GACHA</h1>
-        <p style="color:#aaa; margin-bottom:20px; letter-spacing: 1px;">Sign in to Compete Globally</p>
+        <p style="color:#aaa; margin-bottom:20px;">Sign in to Compete Globally</p>
         <button class="login-btn" onclick="window.loginGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
             Sign in with Google
@@ -107,16 +117,15 @@
     <div id="shop" class="screen">
         <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.8rem;">DAILY SUPPLY</h3>
         <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; border:1px solid #333; width:100%; text-align:center;">
-            <p style="margin:0 0 15px 0;">Claim your daily diamonds to keep summoning!</p>
-            <button id="daily-btn" class="btn" style="background:var(--green); box-shadow:0 4px 0 #1e8449;" onclick="window.claimDaily()">CLAIM 1000 💎</button>
-            <div id="daily-timer" style="font-size:0.9rem; color:var(--gold); margin-top:15px; font-weight:600;"></div>
+            <p>Claim your daily diamonds!</p>
+            <button id="daily-btn" class="btn" style="background:var(--green);" onclick="window.claimDaily()">CLAIM 1000 💎</button>
+            <div id="daily-timer" style="font-size:0.9rem; color:var(--gold); margin-top:15px;"></div>
         </div>
     </div>
 
     <div id="pvp" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.8rem;">BATTLE ARENA</h3>
-        <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px; padding:10px; background:rgba(0,0,0,0.4); border-radius:15px; border:1px solid #333;"></div>
-        
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">BATTLE ARENA</h3>
+        <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px; padding:10px; background:rgba(0,0,0,0.4); border-radius:15px;"></div>
         <div style="width:100%; background:rgba(0,0,0,0.8); padding:15px; border-radius:15px; border:1px solid #444; margin-top:15px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="text-align:center; width:45%;">
@@ -124,30 +133,26 @@
                     <div class="hp-bar"><div id="p-hp" class="hp-fill"></div></div>
                     <span id="p-pwr-val" class="battle-pwr-label">PWR: 0</span>
                 </div>
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <b style="color:var(--red); font-size:2rem; font-family:'Bebas Neue'; font-style:italic;">VS</b>
-                </div>
+                <b style="color:var(--red); font-size:1.5rem; font-family:'Bebas Neue';">VS</b>
                 <div style="text-align:center; width:45%;">
                     <div id="e-fighter" class="fighter-box"><div id="e-rar" class="rarity"></div></div>
                     <div class="hp-bar"><div id="e-hp" class="hp-fill"></div></div>
                     <span id="e-pwr-val" class="battle-pwr-label">PWR: ???</span>
                 </div>
             </div>
-            <div id="battle-log" class="battle-log">Ready for battle...</div>
+            <div id="battle-log" class="battle-log">Ready...</div>
         </div>
-        <button id="btn-fight" class="btn" style="margin-top:20px; font-size:1.5rem;" onclick="window.startBattle()" disabled>START FIGHT</button>
+        <button id="btn-fight" class="btn" style="margin-top:20px;" onclick="window.startBattle()" disabled>START FIGHT</button>
     </div>
 
     <div id="leaderboard" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.8rem;">TOP HERO RANKING</h3>
-        <div id="rank-list" style="width:100%; background:rgba(0,0,0,0.6); border:1px solid var(--gold); border-radius:15px; overflow:hidden;">
-            <div style="padding:20px; text-align:center; color:#888;">Fetching Heroes...</div>
-        </div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">TOP RANKING</h3>
+        <div id="rank-list" style="width:100%; background:rgba(0,0,0,0.6); border:1px solid var(--gold); border-radius:15px;"></div>
     </div>
 
     <div id="profil" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.8rem;">HERO COLLECTION</h3>
-        <div id="inv-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; width:100%;"></div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">MY COLLECTION</h3>
+        <div id="inv-grid"></div>
     </div>
 
     <nav class="nav">
@@ -236,11 +241,9 @@
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
-            
             const flash = document.getElementById('flash-effect');
             flash.style.opacity = '1';
             setTimeout(() => flash.style.opacity = '0', 150);
-
             const sfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
             sfx.play().catch(e => {});
 
@@ -260,7 +263,6 @@
                 if(o) o.dupes++; else db.inv.push({...rolled, lvl:1, dupes:0});
             }
             window.save();
-
             if(t===1){
                 document.getElementById('multi-view').style.display='none';
                 document.getElementById('single-view').style.display='block';
@@ -286,43 +288,29 @@
             const btn = document.getElementById('btn-fight');
             const log = document.getElementById('battle-log');
             btn.disabled = true;
-
             let enemy = heroPool[Math.floor(Math.random()*heroPool.length)];
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
-
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
             document.getElementById('e-rar').innerText = enemy.rar;
             document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
             document.getElementById('e-pwr-val').innerText = `PWR: ${ePwr.toLocaleString()}`;
-
             let php = 100, ehp = 100;
-            log.innerText = "Battle Start! " + db.selected.name + " VS " + enemy.name;
-
+            log.innerText = "Battle Start!";
             const loop = setInterval(() => {
-                const hitSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); 
-                hitSfx.play().catch(()=>{});
-
+                const hitSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); hitSfx.play().catch(()=>{});
                 document.getElementById('e-fighter').classList.add('hit-anim');
                 document.getElementById('p-fighter').classList.add('hit-anim');
                 setTimeout(() => {
                     document.getElementById('e-fighter').classList.remove('hit-anim');
                     document.getElementById('p-fighter').classList.remove('hit-anim');
                 }, 200);
-
-                ehp -= (pPwr / (ePwr * 0.8)) * 10; 
-                php -= (ePwr / (pPwr * 0.8)) * 10;
-
+                ehp -= (pPwr / (ePwr * 0.8)) * 10; php -= (ePwr / (pPwr * 0.8)) * 10;
                 document.getElementById('p-hp').style.width = Math.max(0, php) + "%";
                 document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
-                log.innerText = `Exchanging Blows... Player HP: ${Math.floor(php)}%`;
-
                 if(ehp <= 0 || php <= 0) {
                     clearInterval(loop);
-                    if(ehp <= 0) { 
-                        db.dia += 100; window.save(); 
-                        alert("VICTORY! +100 💎"); 
-                    } else { alert("DEFEAT!"); }
+                    if(ehp <= 0) { db.dia += 100; window.save(); alert("VICTORY! +100 💎"); } else { alert("DEFEAT!"); }
                     btn.disabled = false;
                 }
             }, 800);
@@ -349,12 +337,12 @@
                 snap.forEach(doc => {
                     let d = doc.data();
                     html += `<div style="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center; ${d.id === db.id ? 'background:rgba(255,215,0,0.15);' : ''}">
-                        <span><b style="color:var(--gold);">${rank}.</b> ${d.name} <br><small style="color:#666; font-size:0.6rem;">${d.id}</small></span>
-                        <b style="color:var(--gold); font-family:'Bebas Neue'; font-size:1.2rem;">${d.pwr.toLocaleString()}</b>
+                        <span><b>${rank}.</b> ${d.name}</span>
+                        <b style="color:var(--gold);">${d.pwr.toLocaleString()}</b>
                     </div>`;
                     rank++;
                 });
-                document.getElementById('rank-list').innerHTML = html || '<div style="padding:20px; text-align:center;">No data...</div>';
+                document.getElementById('rank-list').innerHTML = html || '<div style="padding:20px;">No data...</div>';
             }
 
             if(id === 'pvp') {
@@ -398,7 +386,6 @@
 
         window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play().catch(()=>{}); } };
         window.changeName = () => { let n = prompt("Hero Name?"); if(n) { db.name = n.toUpperCase(); window.save(); } };
-
         window.save();
     </script>
 </body>
