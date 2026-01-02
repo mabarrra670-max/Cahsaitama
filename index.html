@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>One Punch Gacha: Final Edition</title>
+    <title>One Punch Gacha: All-in-One</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -34,7 +34,6 @@
         .nav-item.active { color: var(--gold); }
         .nav-item span { font-size: 1.4rem; margin-bottom: 2px; }
 
-        /* ANIMATIONS */
         @keyframes gachaPop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
         .gacha-anim { animation: gachaPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(2px,2px); } 50% { transform: translate(-2px,-2px); } }
@@ -104,7 +103,7 @@
         <h2 style="font-family:'Bebas Neue'; color:var(--gold);">PROFILE</h2>
         <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; width:100%; text-align:center; border:1px solid var(--gold);">
             <h3 id="prof-name-val" style="margin:5px 0;">PLAYER</h3>
-            <div style="font-size:0.8rem; color:#ccc;">Hero: <span id="prof-hero-val" style="color:var(--gold);">None</span></div>
+            <div style="font-size:0.8rem; color:#ccc;">Hero Aktif: <span id="prof-hero-val" style="color:var(--gold);">None</span></div>
         </div>
         <h4 style="margin: 15px 0 10px;">KOLEKSI (Klik untuk Pakai)</h4>
         <div id="inv-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; width:100%;"></div>
@@ -140,10 +139,8 @@
             { id:3, name:"Saitama", rar:"SSR", pwr:50000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png", rate:10 }
         ];
 
-        // INISIALISASI DB - Pastikan coin ada (0 jika belum ada)
         let db = JSON.parse(localStorage.getItem('OPG_DATA')) || { name:"PLAYER", dia:500, coin:0, inv:[], selected:null };
         if (db.coin === undefined) db.coin = 0; 
-        if (tg.initDataUnsafe?.user) db.name = tg.initDataUnsafe.user.first_name.toUpperCase();
 
         window.save = () => {
             localStorage.setItem('OPG_DATA', JSON.stringify(db));
@@ -152,7 +149,6 @@
             document.getElementById('p-name').innerText = db.name;
             document.getElementById('prof-name-val').innerText = db.name;
             document.getElementById('prof-hero-val').innerText = db.selected ? db.selected.name : "None";
-            
             socket.emit("update_my_status", { 
                 name: db.name, 
                 hero: db.selected ? db.selected.name : "None", 
@@ -177,10 +173,8 @@
             let r = Math.random()*100, cur=0, rolled;
             for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
             if(!rolled) rolled = heroPool[heroPool.length-1];
-            
             let o = db.inv.find(x => x.id === rolled.id);
             if(o) o.lvl = (o.lvl || 1) + 1; else db.inv.push({...rolled, lvl:1});
-            
             const view = document.getElementById('single-view');
             view.classList.remove('gacha-anim');
             setTimeout(() => {
@@ -208,7 +202,7 @@
         };
 
         window.startMatchmaking = () => {
-            if(!db.selected) return alert("Pilih Hero dulu di Profile!");
+            if(!db.selected) return alert("Pilih Hero di Profile!");
             socket.emit("find_match", { name: db.name, img: db.selected.img, pwr: db.selected.pwr * (db.selected.lvl || 1) });
             document.getElementById('btn-match').innerText = "MENCARI...";
         };
@@ -226,20 +220,29 @@
             document.getElementById('e-fighter').style.backgroundImage = `url('${opp.img}')`;
             document.getElementById('p-fighter').innerHTML = '<div class="hp-container"><div id="hp1" class="hp-bar"></div></div>';
             document.getElementById('e-fighter').innerHTML = '<div class="hp-container"><div id="hp2" class="hp-bar" style="background:red"></div></div>';
+            
             let s = 0;
+            const myBase = db.selected.pwr * (db.selected.lvl || 1);
+            const myPwr = myBase * (0.9 + Math.random() * 0.2); 
+            const oppPwr = opp.pwr * (0.9 + Math.random() * 0.2);
+
             let i = setInterval(() => {
                 s++; 
                 document.getElementById('arena-box').classList.add('shake');
                 tg.HapticFeedback.impactOccurred('heavy');
                 setTimeout(() => document.getElementById('arena-box').classList.remove('shake'), 100);
                 
-                const myPwr = db.selected.pwr * (db.selected.lvl || 1);
-                if(myPwr > opp.pwr) document.getElementById('hp2').style.width = (100 - (s*20))+"%";
-                else document.getElementById('hp1').style.width = (100 - (s*20))+"%";
+                if(myPwr > oppPwr) {
+                    document.getElementById('hp2').style.width = (100 - (s*20))+"%";
+                    document.getElementById('hp1').style.width = "100%";
+                } else {
+                    document.getElementById('hp1').style.width = (100 - (s*20))+"%";
+                    document.getElementById('hp2').style.width = "100%";
+                }
                 
                 if(s>=5){ 
                     clearInterval(i); 
-                    showRes(myPwr >= opp.pwr); 
+                    showRes(myPwr > oppPwr); 
                     document.getElementById('btn-match').innerText = "CARI LAWAN";
                 }
             }, 600);
@@ -265,14 +268,13 @@
                 if(db.selected && db.selected.id === id) db.selected = null;
                 db.inv.splice(idx, 1);
                 db.coin += 10;
-                window.save();
-                updateMarket();
+                window.save(); updateMarket();
             }
         };
 
         window.buyDia = (a, p) => {
             if(db.coin < p) return alert("Koin tidak cukup!");
-            db.coin -= p; db.dia += a; window.save(); alert("Berhasil beli " + a + " Diamond!");
+            db.coin -= p; db.dia += a; window.save(); alert("Berhasil beli!");
         };
 
         socket.on("leaderboard_data", (data) => {
@@ -283,7 +285,7 @@
                 </div>`).join('');
         });
 
-        window.save(); // Jalankan save pertama kali untuk init data
+        window.save();
     </script>
 </body>
-</html>
+                </html>
