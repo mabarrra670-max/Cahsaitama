@@ -37,10 +37,10 @@
         .R { background: var(--blue); color: #fff; }
         
         /* Badge Elemen */
-        .type-badge { position: absolute; top: 5px; left: 5px; padding: 2px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: bold; text-transform: uppercase; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.3); z-index: 5; }
-        .type-Physical { color: #ff4757; border-color: #ff4757; }
-        .type-Energy { color: #3498db; border-color: #3498db; }
-        .type-Tactics { color: #2ecc71; border-color: #2ecc71; }
+        .type-badge { position: absolute; top: 5px; left: 5px; padding: 2px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: bold; text-transform: uppercase; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); z-index: 5; color: #fff; }
+        .type-Physical { border-color: #ff4757; color: #ff4757; }
+        .type-Energy { border-color: #3498db; color: #3498db; }
+        .type-Tactics { border-color: #2ecc71; color: #2ecc71; }
 
         @keyframes glow-lr { from { box-shadow: 0 0 10px #f00; } to { box-shadow: 0 0 25px #ff0; } }
 
@@ -79,8 +79,7 @@
         <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem; text-shadow: 0 0 20px rgba(255,215,0,0.5);">ONE PUNCH GACHA</h1>
         <p style="color:#aaa; margin-bottom:20px;">Sign in to Compete Globally</p>
         <button class="login-btn" onclick="window.loginGoogle()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-            Sign in with Google
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign in with Google
         </button>
     </div>
 
@@ -207,6 +206,16 @@
             name:"PLAYER", id: "OPG-TEMP", dia:5000, inv:[], selected:null, lastClaim:0, pity:0 
         };
 
+        // --- SISTEM MIGRASI DATA OTOMATIS (Mencegah Undefined) ---
+        db.inv = db.inv.map(item => {
+            const ref = heroPool.find(h => h.id === item.id);
+            if(ref) {
+                if(!item.type) item.type = ref.type;
+                if(!item.img) item.img = ref.img;
+            }
+            return item;
+        });
+
         window.loginGoogle = () => {
             signInWithPopup(auth, provider).catch(e => alert("Login Error: " + e.message));
         };
@@ -246,7 +255,6 @@
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
-            
             const flash = document.getElementById('flash-effect');
             
             let res = [];
@@ -264,15 +272,18 @@
                 }
                 res.push(rolled);
                 let o = db.inv.find(x => x.id === rolled.id);
-                if(o) o.dupes++; else db.inv.push({...rolled, lvl:1, dupes:0});
+                if(o) {
+                    o.dupes++;
+                    o.type = rolled.type; // Update type jika data lama
+                } else {
+                    db.inv.push({...rolled, lvl:1, dupes:0});
+                }
             }
 
-            // Visual Effect Gacha
-            if(hasBest) flash.style.background = "gold";
-            else flash.style.background = "white";
-            
+            // Efek Flash
+            flash.style.background = hasBest ? "gold" : "white";
             flash.style.opacity = '1';
-            setTimeout(() => flash.style.opacity = '0', 200);
+            setTimeout(() => flash.style.opacity = '0', 150);
             
             const sfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
             sfx.play().catch(e => {});
@@ -286,7 +297,6 @@
                 document.getElementById('gacha-rarity').className = `rarity ${res[0].rar}`;
                 document.getElementById('gacha-type').innerText = res[0].type;
                 document.getElementById('gacha-type').className = `type-badge type-${res[0].type}`;
-                
                 const cardBox = document.getElementById('card-box');
                 cardBox.style.transform = "rotateY(180deg)";
                 setTimeout(()=> cardBox.style.transform="rotateY(0deg)", 2000);
@@ -312,13 +322,13 @@
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
             
-            // LOGIKA COUNTER: Physical > Tactics > Energy > Physical
+            // LOGIKA COUNTER
             let bonusText = "";
             if((db.selected.type === "Physical" && enemy.type === "Tactics") || 
                (db.selected.type === "Tactics" && enemy.type === "Energy") || 
                (db.selected.type === "Energy" && enemy.type === "Physical")) {
                 pPwr = Math.floor(pPwr * 1.3);
-                bonusText = " <small style='color:var(--green)'>+30% ELEMENT BONUS!</small>";
+                bonusText = " <span style='color:var(--green)'>(ADVANTAGE!)</span>";
             }
 
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
@@ -329,7 +339,7 @@
             document.getElementById('e-pwr-val').innerText = `PWR: ${ePwr.toLocaleString()}`;
             
             let php = 100, ehp = 100;
-            log.innerHTML = `Battle Start: ${db.selected.name} vs ${enemy.name}${bonusText}`;
+            log.innerHTML = `Fight: ${db.selected.name} vs ${enemy.name}${bonusText}`;
             
             const loop = setInterval(() => {
                 const hitSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); hitSfx.play().catch(()=>{});
@@ -339,22 +349,18 @@
                     document.getElementById('e-fighter').classList.remove('hit-anim');
                     document.getElementById('p-fighter').classList.remove('hit-anim');
                 }, 200);
-                
-                ehp -= (pPwr / (ePwr * 0.8)) * 12; 
-                php -= (ePwr / (pPwr * 0.8)) * 12;
-                
+
+                ehp -= (pPwr / (ePwr * 0.8)) * 12; php -= (ePwr / (pPwr * 0.8)) * 12;
                 document.getElementById('p-hp').style.width = Math.max(0, php) + "%";
                 document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
-                
+
                 if(ehp <= 0 || php <= 0) {
                     clearInterval(loop);
                     if(ehp <= 0) { 
                         db.dia += 100; window.save(); 
                         log.innerHTML = "<b style='color:var(--green)'>VICTORY! +100 💎</b>";
-                        alert("VICTORY! +100 💎"); 
                     } else { 
                         log.innerHTML = "<b style='color:var(--red)'>DEFEAT!</b>";
-                        alert("DEFEAT!"); 
                     }
                     btn.disabled = false;
                 }
@@ -370,9 +376,9 @@
                 document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
                     <div class="card-item" style="background-image:url('${h.img}')">
                         <div class="rarity ${h.rar}">${h.rar}</div>
-                        <div class="type-badge type-${h.type}">${h.type}</div>
+                        <div class="type-badge type-${h.type || 'Physical'}">${h.type || 'Physical'}</div>
                         <div class="pwr-tag">PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div>
-                        <div class="card-actions"><button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl} (${h.dupes}/5)</button></div>
+                        <div class="card-actions"><button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl}</button></div>
                     </div>`).join('');
             }
 
@@ -395,7 +401,7 @@
                 document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `
                     <div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative;">
                         <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
-                        <div class="type-badge type-${h.type}" style="font-size:0.4rem; top:2px; left:2px;">${h.type}</div>
+                        <div class="type-badge type-${h.type || 'Physical'}" style="font-size:0.4rem; top:2px; left:2px;">${h.type || 'Physical'}</div>
                     </div>`).join('');
             }
         };
@@ -441,4 +447,4 @@
         window.save();
     </script>
 </body>
-                </html>
+            </html>
