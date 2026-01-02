@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>One Punch Gacha: Firebase Edition</title>
+    <title>One Punch Gacha: Battle Power Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd700; --red: #ff4757; --dark: #0a0a0a; --green: #2ecc71; --purple: #a020f0; --blue: #3498db; --orange: #e67e22; }
@@ -11,7 +11,7 @@
         
         #videoBg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.2); pointer-events: none; }
 
-        /* LOGIN SCREEN */
+        /* LAYAR LOGIN OVERLAY */
         #login-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .login-btn { background: #fff; color: #333; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
 
@@ -51,8 +51,8 @@
 <body onclick="window.initAudio()">
 
     <div id="login-screen">
-        <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem; letter-spacing:2px; margin-bottom:10px;">ONE PUNCH GACHA</h1>
-        <p style="color:#aaa; font-size:0.9rem; margin-bottom:30px;">Login untuk menyimpan progress Hero Anda</p>
+        <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem;">ONE PUNCH GACHA</h1>
+        <p style="color:#aaa; margin-bottom:20px;">Masuk untuk Memulai Petualangan</p>
         <button class="login-btn" onclick="window.loginGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
             Sign in with Google
@@ -121,11 +121,11 @@
                 </div>
             </div>
         </div>
-        <button id="btn-fight" class="btn" style="margin-top:20px; font-size:1.2rem;" onclick="window.startBattle()" disabled>START BATTLE</button>
+        <button id="btn-fight" class="btn" style="margin-top:20px;" onclick="window.startBattle()" disabled>START BATTLE</button>
     </div>
 
     <div id="leaderboard" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">LEADERBOARD (TOTAL PWR)</h3>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">LEADERBOARD</h3>
         <div id="rank-list" style="width:100%; background:#111; border:1px solid var(--gold); border-radius:10px;"></div>
     </div>
 
@@ -175,7 +175,10 @@
         };
 
         window.loginGoogle = () => {
-            signInWithPopup(auth, provider).catch(e => alert("Login Error: " + e.message));
+            signInWithPopup(auth, provider).catch(e => {
+                alert("Login Error: " + e.message);
+                console.error(e);
+            });
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -184,6 +187,8 @@
                 db.name = user.displayName.split(' ')[0].toUpperCase();
                 db.id = "OPG-" + user.uid.substring(0, 5).toUpperCase();
                 window.save();
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
             }
         });
 
@@ -196,12 +201,11 @@
             updateDailyStatus();
         };
 
-        window.initAudio = () => { let v = document.getElementById('videoBg'); v.muted = false; v.play(); };
+        window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play(); } };
 
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
-            new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3').play();
             let res = [];
             for(let i=0; i<t; i++){
                 db.pity++;
@@ -234,13 +238,14 @@
         };
 
         window.startBattle = () => {
+            if(!db.selected) return alert("Pilih Hero dulu!");
             document.getElementById('btn-fight').disabled = true;
             let enemy = heroPool[Math.floor(Math.random()*heroPool.length)];
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
-            document.getElementById('e-rar').innerText = enemy.rar;
             document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
+            document.getElementById('e-rar').innerText = enemy.rar;
             document.getElementById('e-pwr-val').innerText = `PWR: ${ePwr.toLocaleString()}`;
             let php = 100, ehp = 100;
             const loop = setInterval(() => {
@@ -281,7 +286,7 @@
         window.upHero = (id) => {
             let h = db.inv.find(x => x.id === id);
             if(h.dupes >= 5) { h.dupes -= 5; h.lvl++; window.save(); window.nav('profil', document.querySelectorAll('.nav-item')[4]); }
-            else alert("Butuh 5 kartu duplikat!");
+            else alert("Butuh 5 duplikat!");
         };
 
         window.prep = (id) => {
@@ -296,7 +301,7 @@
 
         window.claimDaily = () => {
             let now = Date.now();
-            if (now - db.lastClaim >= 86400000) { db.dia += 1000; db.lastClaim = now; window.save(); alert("Claimed!"); }
+            if (now - db.lastClaim >= 86400000) { db.dia += 1000; db.lastClaim = now; window.save(); alert("Diamond Ditambahkan!"); }
         };
 
         function updateDailyStatus() {
@@ -318,4 +323,4 @@
         window.save();
     </script>
 </body>
-  </html>
+    </html>
