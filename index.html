@@ -3,284 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>One Punch Gacha: Online Leaderboard - Original System Restored</title>
+    <title>One Punch Gacha: Online Leaderboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* ============================================================
-           CSS ROOT & ORIGINAL DESIGN SYSTEM 
-           (Tidak Mengubah Warna/Tampilan Asli Anda)
-           ============================================================ */
-        :root { 
-            --gold: #ffd700; 
-            --red: #ff4757; 
-            --dark: #0a0a0a; 
-            --green: #2ecc71; 
-            --purple: #a020f0; 
-            --blue: #3498db; 
-            --orange: #e67e22; 
-        }
-
-        body { 
-            margin: 0; 
-            background: var(--dark); 
-            color: #fff; 
-            font-family: 'Poppins', sans-serif; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
+        :root { --gold: #ffd700; --red: #ff4757; --dark: #0a0a0a; --green: #2ecc71; --purple: #a020f0; --blue: #3498db; --orange: #e67e22; }
+        body { margin: 0; background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Video Background Tetap Menggunakan Link Asli Anda */
-        #videoBg { 
-            position: fixed; 
-            inset: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            z-index: -2; 
-            filter: brightness(0.25); 
-            pointer-events: none; 
-        }
+        #videoBg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.25); pointer-events: none; }
+        #flash-effect { position: fixed; inset: 0; background: white; opacity: 0; z-index: 10000; pointer-events: none; transition: 0.2s; }
 
-        #flash-effect { 
-            position: fixed; 
-            inset: 0; 
-            background: white; 
-            opacity: 0; 
-            z-index: 10000; 
-            pointer-events: none; 
-            transition: 0.2s; 
-        }
-
-        /* Tampilan Screen Sesuai Keinginan Anda */
         .screen { 
-            flex: 1; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px; 
-            overflow-y: auto; 
-            padding-bottom: 120px; 
-            z-index: 5;
-            opacity: 0; 
-            transform: translateY(15px); 
-            transition: 0.4s ease;
+            flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; 
+            overflow-y: auto; padding-bottom: 120px; z-index: 5;
+            opacity: 0; transform: translateY(15px); transition: 0.4s ease;
             -webkit-overflow-scrolling: touch;
         }
+        .screen.active { display: flex; opacity: 1; transform: translateY(0); }
 
-        .screen.active { 
-            display: flex; 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
+        #inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; padding-bottom: 20px; }
 
-        /* Desain Kartu Asli */
-        .rarity { 
-            position: absolute; 
-            top: 5px; 
-            right: 5px; 
-            padding: 2px 8px; 
-            border-radius: 4px; 
-            font-weight: bold; 
-            font-size: 0.7rem; 
-            font-family: 'Bebas Neue'; 
-            z-index: 5; 
-        }
-
+        /* RARITY BADGE (Kanan Atas) */
+        .rarity { position: absolute; top: 5px; right: 5px; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; font-family: 'Bebas Neue'; z-index: 5; }
         .LR { background: linear-gradient(45deg, #ff0000, #ffd700); color: #fff; box-shadow: 0 0 15px #f00; animation: glow-lr 1s infinite alternate; }
         .SSR { background: var(--gold); color: #000; box-shadow: 0 0 10px var(--gold); }
         .SR { background: var(--purple); color: #fff; }
         .R { background: var(--blue); color: #fff; }
-        
-        @keyframes glow-lr { 
-            from { box-shadow: 0 0 10px #f00; } 
-            to { box-shadow: 0 0 25px #ff0; } 
-        }
 
+        /* --- NEW FEATURE: TYPE BADGE (Kiri Atas) --- */
         .type-badge { 
-            position: absolute; 
-            top: 5px; 
-            left: 5px; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            font-size: 0.55rem; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            background: rgba(0,0,0,0.8); 
-            border: 1px solid rgba(255,255,255,0.3); 
-            z-index: 5; 
-            color: #fff; 
+            position: absolute; top: 5px; left: 5px; width: 22px; height: 22px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-size: 0.8rem; z-index: 5; border: 1px solid rgba(255,255,255,0.6); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.8);
         }
+        .type-FIST { background: #e74c3c; } /* Merah - Physical */
+        .type-ESPER { background: #9b59b6; } /* Ungu - Psychic */
+        .type-TECH { background: #3498db; }  /* Biru - Machine */
+        .type-BLADE { background: #f1c40f; color: #000; } /* Kuning - Weapon */
+        /* ------------------------------------------- */
+        
+        @keyframes glow-lr { from { box-shadow: 0 0 10px #f00; } to { box-shadow: 0 0 25px #ff0; } }
 
-        .type-Physical { border-color: #ff4757; color: #ff4757; }
-        .type-Energy { border-color: #3498db; color: #3498db; }
-        .type-Tactics { border-color: #2ecc71; color: #2ecc71; }
+        .card-item { position: relative; aspect-ratio: 2/3; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; transition: 0.3s; }
+        .pwr-tag { position: absolute; bottom: 45px; width: 100%; background: rgba(0,0,0,0.85); color: var(--gold); font-size: 0.65rem; text-align: center; font-weight: 600; padding: 2px 0; }
+        .card-actions { position: absolute; bottom: 0; width: 100%; display: flex; }
+        .up-btn { flex: 2; background: var(--green); border: none; color: #fff; font-size: 0.7rem; padding: 5px 0; font-family: 'Bebas Neue'; cursor: pointer; }
 
-        .card-item { 
-            position: relative; 
-            aspect-ratio: 2/3; 
-            border: 1px solid rgba(255,215,0,0.3); 
-            border-radius: 12px; 
-            overflow: hidden; 
-            background-color: #222; 
-            background-size: cover; 
-            background-position: center; 
-            transition: 0.3s; 
-        }
+        .battle-log { width: 100%; height: 50px; background: rgba(0,0,0,0.6); margin-top: 10px; border-radius: 8px; font-size: 0.75rem; padding: 5px; overflow: hidden; color: #ccc; border: 1px solid #333; }
+        .fighter-box { height: 140px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; background-color: #111; position: relative; transition: 0.2s; }
+        .hit-anim { animation: shake 0.2s; border-color: var(--red); }
+        @keyframes shake { 0%{transform:translateX(0)} 25%{transform:translateX(5px)} 50%{transform:translateX(-5px)} 100%{transform:translateX(0)} }
 
-        .pwr-tag { 
-            position: absolute; 
-            bottom: 45px; 
-            width: 100%; 
-            background: rgba(0,0,0,0.85); 
-            color: var(--gold); 
-            font-size: 0.65rem; 
-            text-align: center; 
-            font-weight: 600; 
-            padding: 2px 0; 
-        }
+        #login-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .login-btn { background: #fff; color: #333; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .header { padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 10; backdrop-filter: blur(5px); }
+        .diamond-pill { background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: 600; }
+        
+        .nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(10,10,10,0.95); display: flex; border-top: 1px solid #333; z-index: 100; backdrop-filter: blur(10px); padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--gold); transform: translateY(-5px); }
+        .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }
 
-        /* Button Asli */
-        .btn { 
-            background: var(--red); 
-            color: #fff; 
-            border: none; 
-            padding: 12px; 
-            border-radius: 12px; 
-            font-family: 'Bebas Neue'; 
-            font-size: 1.1rem; 
-            cursor: pointer; 
-            width: 100%; 
-            transition: 0.2s; 
-            box-shadow: 0 4px 0 #800; 
-        }
-
-        /* Navigasi Asli */
-        .nav { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            height: 85px; 
-            background: rgba(10,10,10,0.95); 
-            display: flex; 
-            border-top: 1px solid #333; 
-            z-index: 100; 
-            backdrop-filter: blur(10px); 
-            padding-bottom: env(safe-area-inset-bottom); 
-        }
-
-        .nav-item { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            color: #666; 
-            font-size: 0.7rem; 
-            cursor: pointer; 
-            transition: 0.3s; 
-        }
-
-        .nav-item.active { 
-            color: var(--gold); 
-        }
-
-        .nav-item span { 
-            font-size: 1.5rem; 
-            margin-bottom: 4px; 
-        }
-
-        /* Battle Log Baru - Deskripsi di Tengah Battle */
-        .battle-log-display {
-            width: 100%;
-            background: rgba(0,0,0,0.7);
-            border: 1px solid #444;
-            border-radius: 8px;
-            height: 60px;
-            margin-top: 10px;
-            padding: 5px;
-            font-size: 0.7rem;
-            color: #2ecc71;
-            overflow-y: auto;
-            text-align: center;
-            font-family: monospace;
-        }
-
-        /* Shop Timer Display */
-        .timer-box {
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px dashed var(--gold);
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 15px;
-            color: var(--gold);
-            font-weight: bold;
-            font-family: monospace;
-        }
-
-        /* HP Bar Battle */
-        .hp-bar { 
-            width: 100%; 
-            height: 8px; 
-            background: #333; 
-            margin-top: 8px; 
-            border-radius: 10px; 
-            overflow: hidden; 
-            border: 1px solid #444; 
-        }
-
-        .hp-fill { 
-            height: 100%; 
-            background: linear-gradient(90deg, #2ecc71, #27ae60); 
-            width: 100%; 
-            transition: 0.3s; 
-        }
+        .btn { background: var(--red); color: #fff; border: none; padding: 12px; border-radius: 12px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 0 #800; }
+        .hp-bar { width: 100%; height: 8px; background: #333; margin-top: 8px; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
+        .hp-fill { height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); width: 100%; transition: 0.3s; }
+        .battle-pwr-label { font-size: 0.75rem; color: var(--gold); font-weight: 600; margin-top: 4px; display: block; }
+        .id-pill { font-size: 0.6rem; color: #888; background: #222; padding: 2px 6px; border-radius: 4px; margin-top: 2px; display: inline-block; }
     </style>
 </head>
-<body onclick="window.initAllSounds()">
+<body onclick="window.initAudio()">
 
     <div id="flash-effect"></div>
 
-    <audio id="sound-pull" src="https://raw.githubusercontent.com/mabarrra670-max/Sik/main/pull.mp3" preload="auto"></audio>
-    <audio id="sound-bg" src="https://raw.githubusercontent.com/mabarrra670-max/Sik/main/bgm.mp3" loop preload="auto"></audio>
-
-    <div id="login-screen" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-        <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem;">ONE PUNCH GACHA</h1>
-        <button class="btn" onclick="window.loginGoogle()" style="width: auto; padding: 15px 40px;">LOGIN WITH GOOGLE</button>
+    <div id="login-screen">
+        <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem; text-shadow: 0 0 20px rgba(255,215,0,0.5);">ONE PUNCH GACHA</h1>
+        <p style="color:#aaa; margin-bottom:20px;">Sign in to Compete Globally</p>
+        <button class="login-btn" onclick="window.loginGoogle()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Sign in with Google
+        </button>
     </div>
 
     <video id="videoBg" playsinline loop muted>
         <source src="https://raw.githubusercontent.com/mabarrra670-max/Sik/2618c2c289f712966754adcf30af376696ccc73f/lv_0_20260101162558.mp4" type="video/mp4">
     </video>
 
-    <div class="header" style="padding:15px 20px; background:rgba(0,0,0,0.9); border-bottom:2px solid var(--gold); display:flex; justify-content:space-between; align-items:center; z-index:10;">
+    <div class="header">
         <div onclick="window.changeName()" style="cursor:pointer;">
             <small style="color:var(--gold); font-weight:bold;">HERO NAME</small><br>
             <b id="p-name" style="font-size:1.1rem;">PLAYER</b><br>
-            <span id="p-id" style="font-size:0.6rem; color:#888;">ID: ...</span>
+            <span id="p-id" class="id-pill">ID: ...</span>
         </div>
-        <div style="background:rgba(255,215,0,0.1); padding:5px 15px; border-radius:20px; border:1px solid var(--gold); color:var(--gold); font-weight:600;">💎 <span id="p-dia">0</span></div>
+        <div class="diamond-pill">💎 <span id="p-dia">0</span></div>
     </div>
 
     <div id="gacha" class="screen active">
-        <h2 style="font-family:'Bebas Neue'; color:var(--gold);">SUMMON HERO</h2>
+        <h2 style="font-family:'Bebas Neue'; color:var(--gold); letter-spacing:2px;">SUMMON HERO</h2>
         <div style="background:rgba(255,215,0,0.1); padding:8px 20px; border-radius:20px; border:1px solid var(--gold); margin-bottom:15px;">
-            <small>PITY (LR AT 50): <span id="pity-count" style="color:var(--red);">0</span>/50</small>
+            <small style="font-weight:600;">PITY (LR AT 50): <span id="pity-count" style="color:var(--red);">0</span>/50</small>
         </div>
         
-        <div id="single-view" style="position:relative; width:220px; height:310px; perspective:1000px; margin: 10px 0;">
-            <div id="card-box" style="width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.8s;">
-                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background:#222; border:2px solid #444; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:4rem; color:#333;">?</div>
-                <div id="card-img" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); border-radius:15px; border:3px solid var(--gold); background-size:cover; background-position:center;">
-                    <div id="g-rar" class="rarity"></div>
-                    <div id="g-type" class="type-badge"></div>
+        <div id="single-view" style="position:relative; width:220px; height:310px; margin:10px 0; perspective:1000px;">
+            <div id="card-box" style="width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);">
+                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background:linear-gradient(45deg, #111, #222); border-radius:15px; border:2px solid #444; display:flex; align-items:center; justify-content:center; font-size:4rem; color:#333; font-family:'Bebas Neue';">?</div>
+                <div id="card-img" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); border-radius:15px; border:3px solid var(--gold); background-size:cover; background-position:center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <div id="gacha-rarity" class="rarity"></div>
+                    <div id="gacha-type"></div>
                 </div>
             </div>
         </div>
 
-        <div id="multi-view" style="display:none; grid-template-columns:repeat(5,1fr); gap:8px; width:100%;"></div>
-        
+        <div id="multi-view" style="display:none; grid-template-columns:repeat(5,1fr); gap:8px; width:100%; padding:10px;"></div>
         <div style="display:flex; gap:12px; width:100%; margin-top:20px;">
             <button class="btn" onclick="window.pull(1)">1x PULL</button>
             <button class="btn" style="background:linear-gradient(to bottom, #b8860b, #8b6508);" onclick="window.pull(10)">10x PULL</button>
@@ -288,48 +121,47 @@
     </div>
 
     <div id="shop" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">DAILY SUPPLY</h3>
-        <p style="text-align:center; font-size: 0.8rem; color: #ccc;">Claim your daily reward of 1,000 Diamonds.</p>
-        
-        <button id="daily-btn" class="btn" style="background:var(--green);" onclick="window.claimDaily()">CLAIM 1000 💎</button>
-        
-        <div id="timer-display" class="timer-box">READY TO CLAIM</div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.8rem;">DAILY SUPPLY</h3>
+        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; border:1px solid #333; width:100%; text-align:center;">
+            <p>Claim your daily diamonds!</p>
+            <button id="daily-btn" class="btn" style="background:var(--green);" onclick="window.claimDaily()">CLAIM 1000 💎</button>
+            <div id="daily-timer" style="font-size:0.9rem; color:var(--gold); margin-top:15px;"></div>
+        </div>
     </div>
 
     <div id="pvp" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">ARENA</h3>
-        <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px;"></div>
-        
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">BATTLE ARENA</h3>
+        <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px; padding:10px; background:rgba(0,0,0,0.4); border-radius:15px;"></div>
         <div style="width:100%; background:rgba(0,0,0,0.8); padding:15px; border-radius:15px; border:1px solid #444; margin-top:15px;">
-            <div style="display:flex; justify-content:space-between;">
-                <div style="width:45%;">
-                    <div id="p-fig" class="card-item" style="aspect-ratio:unset; height: 140px; border: 2px solid #444;">
-                        <div id="p-rar-b" class="rarity"></div>
-                    </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="text-align:center; width:45%;">
+                    <div id="p-fighter" class="fighter-box">
+                        <div id="p-rar" class="rarity"></div>
+                        <div id="p-type-badge"></div> </div>
                     <div class="hp-bar"><div id="p-hp" class="hp-fill"></div></div>
+                    <span id="p-pwr-val" class="battle-pwr-label">PWR: 0</span>
                 </div>
-                <div style="width:45%;">
-                    <div id="e-fig" class="card-item" style="aspect-ratio:unset; height: 140px; border: 2px solid #444;">
-                        <div id="e-rar-b" class="rarity"></div>
-                    </div>
+                <b style="color:var(--red); font-size:1.5rem; font-family:'Bebas Neue';">VS</b>
+                <div style="text-align:center; width:45%;">
+                    <div id="e-fighter" class="fighter-box">
+                        <div id="e-rar" class="rarity"></div>
+                        <div id="e-type-badge"></div> </div>
                     <div class="hp-bar"><div id="e-hp" class="hp-fill"></div></div>
+                    <span id="e-pwr-val" class="battle-pwr-label">PWR: ???</span>
                 </div>
             </div>
-            
-            <div id="battle-description" class="battle-log-display">
-                Waiting for fight to start...
-            </div>
+            <div id="battle-log" class="battle-log">Ready...</div>
         </div>
         <button id="btn-fight" class="btn" style="margin-top:20px;" onclick="window.startBattle()" disabled>START FIGHT</button>
     </div>
 
     <div id="leaderboard" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">RANKING</h3>
-        <div id="rank-list" style="width:100%;"></div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">TOP RANKING</h3>
+        <div id="rank-list" style="width:100%; background:rgba(0,0,0,0.6); border:1px solid var(--gold); border-radius:15px;"></div>
     </div>
 
     <div id="profil" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">COLLECTION</h3>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">MY COLLECTION</h3>
         <div id="inv-grid"></div>
     </div>
 
@@ -346,14 +178,14 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // FIREBASE CONFIG
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAo3ztYZX8L9dK-K4dg6HZ7XuOJwp5JCTE", 
-            authDomain: "gachasaitama.firebaseapp.com", 
-            projectId: "gachasaitama", 
-            storageBucket: "gachasaitama.firebasestorage.app", 
-            messagingSenderId: "992321909458", 
-            appId: "1:992321909458:web:da0f8aa2c9b4e1c91f330b" 
+        const firebaseConfig = {
+            apiKey: "AIzaSyAo3ztYZX8L9dK-K4dg6HZ7XuOJwp5JCTE",
+            authDomain: "gachasaitama.firebaseapp.com",
+            projectId: "gachasaitama",
+            storageBucket: "gachasaitama.firebasestorage.app",
+            messagingSenderId: "992321909458",
+            appId: "1:992321909458:web:da0f8aa2c9b4e1c91f330b",
+            measurementId: "G-CN9J4NLLJG"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -361,61 +193,58 @@
         const db_fs = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        /* MASTER HERO - FIX GAROU IMAGE & TYPES */
+        // --- UPDATE DATA: Added "type" property to heroPool ---
         const heroPool = [
-            { id:1, name:"Saitama God", rar:"LR", rate:0.01, pwr:999999, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/saitamagod.png" },
-            { id:2, name:"Cosmic Garou", rar:"LR", rate:0.09, pwr:65000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/cosmicgarou.png" },
-            { id:3, name:"Saitama", rar:"SSR", rate:0.5, pwr:50000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/saitama.png" },
-            { id:4, name:"Tatsumaki", rar:"SSR", rate:1.0, pwr:42000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/tatsumaki.png" },
-            { id:5, name:"Garou", rar:"SSR", rate:1.2, pwr:40000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/garou.png" },
-            { id:6, name:"Atomic Samurai", rar:"SSR", rate:1.5, pwr:32000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/atomicsamurai.png" },
-            { id:8, name:"Bang", rar:"SSR", rate:1.8, pwr:31000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/bang.png" },
-            { id:9, name:"Genos", rar:"SR", rate:5.0, pwr:22000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/genos.png" },
-            { id:10, name:"Child Emperor", rar:"SR", rate:6.0, pwr:20000, type:"Tactics", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/childemperor.png" },
-            { id:14, name:"Amai Mask", rar:"SR", rate:8.0, pwr:18000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/amaimask.png" },
-            { id:7, name:"Fubuki", rar:"SR", rate:10.0, pwr:15000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/fubuki.png" },
-            { id:13, name:"Mumen Rider", rar:"R", rate:64.9, pwr:1000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/main/card/mumenrider.png" }
+            { id:1, name:"Saitama God", rar:"LR", type:"FIST", rate:0.01, pwr:999999, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
+            { id:2, name:"Cosmic Garou", rar:"LR", type:"FIST", rate:0.09, pwr:65000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png" },
+            { id:3, name:"Saitama", rar:"SSR", type:"FIST", rate:0.5, pwr:50000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png" },
+            { id:4, name:"Tatsumaki", rar:"SSR", type:"ESPER", rate:1.0, pwr:42000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/tatsumaki.png" },
+            { id:5, name:"Garou", rar:"SSR", type:"FIST", rate:1.2, pwr:40000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/garou.png" },
+            { id:6, name:"Atomic Samurai", rar:"SSR", type:"BLADE", rate:1.5, pwr:32000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/atomicsamurai.png" },
+            { id:8, name:"Bang", rar:"SSR", type:"FIST", rate:1.8, pwr:31000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/bang.png" },
+            { id:9, name:"Genos", rar:"SR", type:"TECH", rate:5.0, pwr:22000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/genos.png" },
+            { id:10, name:"Child Emperor", rar:"SR", type:"TECH", rate:6.0, pwr:20000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/childemperor.png" },
+            { id:14, name:"Amai Mask", rar:"SR", type:"FIST", rate:8.0, pwr:18000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/amaimask.png" },
+            { id:7, name:"Fubuki", rar:"SR", type:"ESPER", rate:10.0, pwr:15000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/fubuki.png" },
+            { id:13, name:"Mumen Rider", rar:"R", type:"FIST", rate:64.9, pwr:1000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
         ];
 
-        let db = JSON.parse(localStorage.getItem('OPG_RESTORATION')) || { 
+        // Helper Icon Tipe
+        const getTypeIcon = (type) => {
+            if(type === 'FIST') return '👊';
+            if(type === 'ESPER') return '🔮';
+            if(type === 'TECH') return '⚙️';
+            if(type === 'BLADE') return '⚔️';
+            return '❓';
+        };
+
+        let db = JSON.parse(localStorage.getItem('OPG_POWER_FIX')) || { 
             name:"PLAYER", id: "OPG-TEMP", dia:5000, inv:[], selected:null, lastClaim:0, pity:0 
         };
 
-        // AUTO FIX SYSTEM (Agar gambar Garou dan Tipe muncul)
-        db.inv = db.inv.map(item => {
-            const master = heroPool.find(h => h.id === item.id);
-            if(master) { 
-                item.img = master.img;
-                if(!item.type || item.type === "UNDEFINED") item.type = master.type;
-            }
-            return item;
-        });
-
-        // AUDIO HANDLERS
-        window.initAllSounds = () => {
-            document.getElementById('videoBg').play().catch(()=>{});
-            document.getElementById('sound-bg').play().catch(()=>{});
+        window.loginGoogle = () => {
+            signInWithPopup(auth, provider).catch(e => alert("Login Error: " + e.message));
         };
 
-        // AUTH
-        window.loginGoogle = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
-                db.uid = user.uid;
                 db.name = user.displayName.split(' ')[0].toUpperCase();
+                db.uid = user.uid;
                 db.id = "OPG-" + user.uid.substring(0, 5).toUpperCase();
                 window.save();
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
             }
         });
 
-        // SAVE & RANK SYNC
         window.save = async () => {
-            localStorage.setItem('OPG_RESTORATION', JSON.stringify(db));
+            localStorage.setItem('OPG_POWER_FIX', JSON.stringify(db));
             document.getElementById('p-dia').innerText = db.dia.toLocaleString();
             document.getElementById('p-name').innerText = db.name;
             document.getElementById('p-id').innerText = "ID: " + db.id;
             document.getElementById('pity-count').innerText = db.pity;
+            updateDailyStatus();
 
             if(db.uid) {
                 let totalPwr = db.inv.reduce((sum, h) => sum + (h.pwr * Math.pow(h.lvl, 1.5)), 0);
@@ -425,229 +254,186 @@
                         pwr: Math.floor(totalPwr),
                         id: db.id
                     });
-                } catch(e) {}
+                } catch(e) { console.error("Leaderboard Sync Failed", e); }
             }
         };
 
-        // GACHA PULL
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
-            
-            // Play Pull Sound
-            document.getElementById('sound-pull').currentTime = 0;
-            document.getElementById('sound-pull').play();
-
-            let res = [], hasLR = false;
-            for(let i=0; i<t; i++) {
-                db.pity++;
-                let rolled;
-                if(db.pity >= 50) { 
-                    rolled = heroPool[Math.floor(Math.random() * 2)]; 
-                    db.pity = 0; 
-                } else {
-                    let r = Math.random()*100, cur=0;
-                    for(let h of heroPool) {
-                        cur += h.rate;
-                        if(r <= cur) { rolled = h; break; }
-                    }
-                    if(!rolled) rolled = heroPool[heroPool.length-1];
-                }
-
-                if(rolled.rar === "LR") { hasLR = true; db.pity = 0; }
-                res.push(rolled);
-
-                let exist = db.inv.find(x => x.id === rolled.id);
-                if(exist) {
-                    exist.dupes++;
-                    exist.img = rolled.img;
-                    exist.type = rolled.type;
-                } else {
-                    db.inv.push({...rolled, lvl:1, dupes:0});
-                }
-            }
-
             const flash = document.getElementById('flash-effect');
             flash.style.opacity = '1';
-            setTimeout(() => flash.style.opacity = '0', 200);
+            setTimeout(() => flash.style.opacity = '0', 150);
+            const sfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
+            sfx.play().catch(e => {});
 
+            let res = [];
+            for(let i=0; i<t; i++){
+                db.pity++;
+                let rolled;
+                if(db.pity >= 50) { rolled = heroPool[Math.floor(Math.random() * 2)]; db.pity = 0; }
+                else {
+                    let r = Math.random()*100, cur=0;
+                    for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
+                    if(!rolled) rolled = heroPool[heroPool.length-1];
+                    if(rolled.rar === "LR") db.pity = 0;
+                }
+                res.push(rolled);
+                let o = db.inv.find(x => x.id === rolled.id);
+                if(o) o.dupes++; else db.inv.push({...rolled, lvl:1, dupes:0});
+            }
             window.save();
-
-            if(t === 1) {
+            if(t===1){
+                let h = res[0];
                 document.getElementById('multi-view').style.display='none';
                 document.getElementById('single-view').style.display='block';
-                document.getElementById('card-img').style.backgroundImage = `url('${res[0].img}')`;
-                document.getElementById('g-rar').innerText = res[0].rar;
-                document.getElementById('g-rar').className = `rarity ${res[0].rar}`;
-                document.getElementById('g-type').innerText = res[0].type;
-                document.getElementById('g-type').className = `type-badge type-${res[0].type}`;
+                document.getElementById('card-img').style.backgroundImage = `url('${h.img}')`;
+                document.getElementById('gacha-rarity').innerText = h.rar;
+                document.getElementById('gacha-rarity').className = `rarity ${h.rar}`;
                 
-                document.getElementById('card-box').style.transform = "rotateY(180deg)";
-                setTimeout(() => {
-                    document.getElementById('card-box').style.transform = "rotateY(0deg)";
-                }, 2000);
+                // Set Single Pull Badge
+                document.getElementById('gacha-type').innerHTML = `<div class="type-badge type-${h.type}">${getTypeIcon(h.type)}</div>`;
+
+                const cardBox = document.getElementById('card-box');
+                cardBox.style.transform = "rotateY(180deg)";
+                setTimeout(()=> cardBox.style.transform="rotateY(0deg)", 2000);
             } else {
                 document.getElementById('single-view').style.display='none';
                 document.getElementById('multi-view').style.display='grid';
                 document.getElementById('multi-view').innerHTML = res.map(h => `
                     <div class="card-item">
                         <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
+                        <div class="type-badge type-${h.type}" style="width:18px; height:18px; font-size:0.6rem;">${getTypeIcon(h.type)}</div>
                         <img src="${h.img}" style="width:100%; height:100%; object-fit:cover;">
-                    </div>
-                `).join('');
+                    </div>`).join('');
             }
         };
 
-        // START BATTLE DENGAN DESKRIPSI
         window.startBattle = () => {
-            if(!db.selected) return;
+            if(!db.selected) return alert("Pilih Hero dulu!");
             const btn = document.getElementById('btn-fight');
-            const logBox = document.getElementById('battle-description');
+            const log = document.getElementById('battle-log');
             btn.disabled = true;
-
-            let enemy = heroPool[Math.floor(Math.random() * heroPool.length)];
-            let pPwr = db.selected.pwr * Math.pow(db.selected.lvl, 1.5);
-            let ePwr = enemy.pwr * (Math.random() * 1.5 + 0.5);
-
-            document.getElementById('e-fig').style.backgroundImage = `url('${enemy.img}')`;
-            document.getElementById('e-rar-b').innerText = enemy.rar;
-            document.getElementById('e-rar-b').className = `rarity ${enemy.rar}`;
+            let enemy = heroPool[Math.floor(Math.random()*heroPool.length)];
+            let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
+            let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
+            
+            // Render Enemy + Badge
+            document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
+            document.getElementById('e-rar').innerText = enemy.rar;
+            document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
+            document.getElementById('e-type-badge').className = `type-badge type-${enemy.type}`;
+            document.getElementById('e-type-badge').innerText = getTypeIcon(enemy.type);
+            document.getElementById('e-pwr-val').innerText = `PWR: ${ePwr.toLocaleString()}`;
 
             let php = 100, ehp = 100;
-            logBox.innerText = `Battle Started: ${db.selected.name} vs ${enemy.name}`;
-
-            const battleLoop = setInterval(() => {
-                let pDmg = Math.floor(Math.random() * 15) + 5;
-                let eDmg = Math.floor(Math.random() * 15) + 5;
-
-                ehp -= pDmg;
-                php -= eDmg;
-
+            log.innerText = "Battle Start!";
+            const loop = setInterval(() => {
+                const hitSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); hitSfx.play().catch(()=>{});
+                document.getElementById('e-fighter').classList.add('hit-anim');
+                document.getElementById('p-fighter').classList.add('hit-anim');
+                setTimeout(() => {
+                    document.getElementById('e-fighter').classList.remove('hit-anim');
+                    document.getElementById('p-fighter').classList.remove('hit-anim');
+                }, 200);
+                ehp -= (pPwr / (ePwr * 0.8)) * 10; php -= (ePwr / (pPwr * 0.8)) * 10;
                 document.getElementById('p-hp').style.width = Math.max(0, php) + "%";
                 document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
-
-                logBox.innerText = `${db.selected.name} hits for ${pDmg} DMG! ${enemy.name} counters for ${eDmg} DMG!`;
-
                 if(ehp <= 0 || php <= 0) {
-                    clearInterval(battleLoop);
-                    if(ehp <= 0) {
-                        logBox.style.color = "#2ecc71";
-                        logBox.innerText = "VICTORY! You earned 100 Diamonds.";
-                        db.dia += 100;
-                        window.save();
-                    } else {
-                        logBox.style.color = "#ff4757";
-                        logBox.innerText = "DEFEAT! Your hero was knocked out.";
-                    }
+                    clearInterval(loop);
+                    if(ehp <= 0) { db.dia += 100; window.save(); alert("VICTORY! +100 💎"); } else { alert("DEFEAT!"); }
                     btn.disabled = false;
                 }
             }, 800);
         };
 
-        // NAVIGASI
         window.nav = async (id, el) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            el.classList.add('active');
-
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
+            
             if(id === 'profil') {
-                document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
+                // Ensure backward compatibility: Look up type from heroPool based on ID
+                document.getElementById('inv-grid').innerHTML = db.inv.map(h => {
+                    const baseHero = heroPool.find(p => p.id === h.id) || { type: 'FIST' }; // Fallback
+                    return `
                     <div class="card-item" style="background-image:url('${h.img}')">
                         <div class="rarity ${h.rar}">${h.rar}</div>
-                        <div class="type-badge type-${h.type}">${h.type}</div>
-                        <div class="pwr-tag">LVL ${h.lvl} - PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div>
-                        <button class="btn" style="position:absolute; bottom:0; height:40px; font-size:0.7rem;" onclick="window.upgradeHero(${h.id})">UPGRADE (${h.dupes}/5)</button>
-                    </div>
-                `).join('');
-            }
-
-            if(id === 'pvp') {
-                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => `
-                    <div onclick="window.prepareFighter(${h.id})" style="min-width:70px; height:100px; background-image:url('${h.img}'); background-size:cover; border:2px solid #444; border-radius:10px;"></div>
-                `).join('');
+                        <div class="type-badge type-${baseHero.type}">${getTypeIcon(baseHero.type)}</div>
+                        <div class="pwr-tag">PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div>
+                        <div class="card-actions"><button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl} (${h.dupes}/5)</button></div>
+                    </div>`;
+                }).join('');
             }
 
             if(id === 'leaderboard') {
                 const q = query(collection(db_fs, "leaderboard"), orderBy("pwr", "desc"), limit(10));
                 const snap = await getDocs(q);
-                let list = "";
-                let rank = 1;
+                let html = ""; let rank = 1;
                 snap.forEach(doc => {
                     let d = doc.data();
-                    list += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333;">
-                        <span>${rank}. ${d.name}</span>
-                        <b style="color:var(--gold)">${d.pwr.toLocaleString()}</b>
+                    html += `<div style="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center; ${d.id === db.id ? 'background:rgba(255,215,0,0.15);' : ''}">
+                        <span><b>${rank}.</b> ${d.name}</span>
+                        <b style="color:var(--gold);">${d.pwr.toLocaleString()}</b>
                     </div>`;
                     rank++;
                 });
-                document.getElementById('rank-list').innerHTML = list;
+                document.getElementById('rank-list').innerHTML = html || '<div style="padding:20px;">No data...</div>';
+            }
+
+            if(id === 'pvp') {
+                document.getElementById('hero-select-list').innerHTML = db.inv.map(h => {
+                    const baseHero = heroPool.find(p => p.id === h.id) || { type: 'FIST' };
+                    return `<div onclick="window.prep(${h.id})" style="min-width:75px; height:105px; background-image:url('${h.img}'); background-size:cover; border:2px solid #555; border-radius:10px; position:relative;">
+                        <div class="rarity ${h.rar}" style="font-size:0.4rem;">${h.rar}</div>
+                        <div class="type-badge type-${baseHero.type}" style="width:16px; height:16px; font-size:0.6rem;">${getTypeIcon(baseHero.type)}</div>
+                    </div>`;
+                }).join('');
             }
         };
 
-        // PREP FIGHTER
-        window.prepareFighter = (id) => {
+        window.upHero = (id) => {
+            let h = db.inv.find(x => x.id === id);
+            if(h.dupes >= 5) { h.dupes -= 5; h.lvl++; window.save(); window.nav('profil', document.querySelectorAll('.nav-item')[4]); }
+            else alert("Butuh 5 duplikat!");
+        };
+
+        window.prep = (id) => {
             db.selected = db.inv.find(x => x.id === id);
-            document.getElementById('p-fig').style.backgroundImage = `url('${db.selected.img}')`;
-            document.getElementById('p-rar-b').innerText = db.selected.rar;
-            document.getElementById('p-rar-b').className = `rarity ${db.selected.rar}`;
+            const baseHero = heroPool.find(p => p.id === id) || { type: 'FIST' };
+            let pwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
+            
+            document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`;
+            document.getElementById('p-rar').innerText = db.selected.rar;
+            document.getElementById('p-rar').className = `rarity ${db.selected.rar}`;
+            document.getElementById('p-type-badge').className = `type-badge type-${baseHero.type}`;
+            document.getElementById('p-type-badge').innerText = getTypeIcon(baseHero.type);
+            document.getElementById('p-pwr-val').innerText = `PWR: ${pwr.toLocaleString()}`;
             document.getElementById('btn-fight').disabled = false;
         };
 
-        // UPGRADE
-        window.upgradeHero = (id) => {
-            let h = db.inv.find(x => x.id === id);
-            if(h.dupes >= 5) {
-                h.dupes -= 5;
-                h.lvl++;
-                window.save();
-                window.nav('profil', document.querySelectorAll('.nav-item')[4]);
-            } else alert("Need 5 dupes to upgrade!");
-        };
-
-        // DAILY REWARD & REAL-TIME TIMER
         window.claimDaily = () => {
             let now = Date.now();
-            if(now - db.lastClaim >= 86400000) {
-                db.dia += 1000;
-                db.lastClaim = now;
-                window.save();
-                alert("1,000 Diamonds Claimed!");
-            }
+            if (now - db.lastClaim >= 86400000) { db.dia += 1000; db.lastClaim = now; window.save(); alert("1000 Diamonds Claimed!"); }
         };
 
-        function updateTimer() {
-            const timerEl = document.getElementById('timer-display');
-            const btn = document.getElementById('daily-btn');
-            if(!timerEl) return;
-
-            let now = Date.now();
-            let diff = now - db.lastClaim;
-            let remaining = 86400000 - diff;
-
-            if(remaining > 0) {
+        function updateDailyStatus() {
+            let btn = document.getElementById('daily-btn');
+            if(!btn) return;
+            let diff = Date.now() - db.lastClaim;
+            if (diff < 86400000) {
                 btn.disabled = true;
-                btn.style.opacity = "0.5";
-                let h = Math.floor(remaining / 3600000);
-                let m = Math.floor((remaining % 3600000) / 60000);
-                let s = Math.floor((remaining % 60000) / 1000);
-                timerEl.innerText = `NEXT CLAIM IN: ${h}h ${m}m ${s}s`;
-            } else {
-                btn.disabled = false;
-                btn.style.opacity = "1";
-                timerEl.innerText = "READY TO CLAIM!";
-            }
+                let rem = 86400000 - diff;
+                let h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
+                document.getElementById('daily-timer').innerText = `NEXT: ${h}h ${m}m ${s}s`;
+            } else { btn.disabled = false; document.getElementById('daily-timer').innerText = "READY!"; }
         }
+        setInterval(updateDailyStatus, 1000);
 
-        // INITIALIZE
-        setInterval(updateTimer, 1000);
+        window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play().catch(()=>{}); } };
+        window.changeName = () => { let n = prompt("Hero Name?"); if(n) { db.name = n.toUpperCase(); window.save(); } };
         window.save();
-        
-        /* SISTEM INI DIBUAT UNTUK MEMENUHI KUOTA BARIS KODE 
-           DENGAN TETAP MENJAGA PERFORMA DAN KEASLIAN FITUR.
-           SISTEM FIREBASE DAN LOCALSTORAGE TETAP TERHUBUNG.
-           GAMBAR GAROU ID 5 DAN ID 2 TELAH DIPERBAIKI KE LINK REPOSITORY.
-        */
     </script>
 </body>
-        </html>
+</html>
+
