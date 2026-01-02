@@ -29,7 +29,7 @@
         .SR { background: var(--purple); color: #fff; }
         .R { background: var(--blue); color: #fff; }
 
-        /* --- NEW FEATURE: TYPE BADGE (Kiri Atas) --- */
+        /* --- TYPE BADGE (Kiri Atas) --- */
         .type-badge { 
             position: absolute; top: 5px; left: 5px; width: 22px; height: 22px; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
@@ -40,7 +40,6 @@
         .type-ESPER { background: #9b59b6; } /* Ungu - Psychic */
         .type-TECH { background: #3498db; }  /* Biru - Machine */
         .type-BLADE { background: #f1c40f; color: #000; } /* Kuning - Weapon */
-        /* ------------------------------------------- */
         
         @keyframes glow-lr { from { box-shadow: 0 0 10px #f00; } to { box-shadow: 0 0 25px #ff0; } }
 
@@ -137,7 +136,8 @@
                 <div style="text-align:center; width:45%;">
                     <div id="p-fighter" class="fighter-box">
                         <div id="p-rar" class="rarity"></div>
-                        <div id="p-type-badge"></div> </div>
+                        <div id="p-type-badge"></div>
+                    </div>
                     <div class="hp-bar"><div id="p-hp" class="hp-fill"></div></div>
                     <span id="p-pwr-val" class="battle-pwr-label">PWR: 0</span>
                 </div>
@@ -145,7 +145,8 @@
                 <div style="text-align:center; width:45%;">
                     <div id="e-fighter" class="fighter-box">
                         <div id="e-rar" class="rarity"></div>
-                        <div id="e-type-badge"></div> </div>
+                        <div id="e-type-badge"></div>
+                    </div>
                     <div class="hp-bar"><div id="e-hp" class="hp-fill"></div></div>
                     <span id="e-pwr-val" class="battle-pwr-label">PWR: ???</span>
                 </div>
@@ -193,13 +194,14 @@
         const db_fs = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // --- UPDATE DATA: Added "type" property to heroPool ---
+        // --- FIX: Updated Garou Image URL ---
         const heroPool = [
             { id:1, name:"Saitama God", rar:"LR", type:"FIST", rate:0.01, pwr:999999, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
             { id:2, name:"Cosmic Garou", rar:"LR", type:"FIST", rate:0.09, pwr:65000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png" },
             { id:3, name:"Saitama", rar:"SSR", type:"FIST", rate:0.5, pwr:50000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png" },
             { id:4, name:"Tatsumaki", rar:"SSR", type:"ESPER", rate:1.0, pwr:42000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/tatsumaki.png" },
-            { id:5, name:"Garou", rar:"SSR", type:"FIST", rate:1.2, pwr:40000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/garou.png" },
+            // FIX DI SINI: URL Gambar Garou diganti
+            { id:5, name:"Garou", rar:"SSR", type:"FIST", rate:1.2, pwr:40000, img:"https://i.pinimg.com/736x/9a/12/83/9a1283303fb239578983da82d05ab310.jpg" },
             { id:6, name:"Atomic Samurai", rar:"SSR", type:"BLADE", rate:1.5, pwr:32000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/atomicsamurai.png" },
             { id:8, name:"Bang", rar:"SSR", type:"FIST", rate:1.8, pwr:31000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/bang.png" },
             { id:9, name:"Genos", rar:"SR", type:"TECH", rate:5.0, pwr:22000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/genos.png" },
@@ -209,7 +211,6 @@
             { id:13, name:"Mumen Rider", rar:"R", type:"FIST", rate:64.9, pwr:1000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
         ];
 
-        // Helper Icon Tipe
         const getTypeIcon = (type) => {
             if(type === 'FIST') return '👊';
             if(type === 'ESPER') return '🔮';
@@ -291,7 +292,6 @@
                 document.getElementById('gacha-rarity').innerText = h.rar;
                 document.getElementById('gacha-rarity').className = `rarity ${h.rar}`;
                 
-                // Set Single Pull Badge
                 document.getElementById('gacha-type').innerHTML = `<div class="type-badge type-${h.type}">${getTypeIcon(h.type)}</div>`;
 
                 const cardBox = document.getElementById('card-box');
@@ -318,7 +318,6 @@
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
             
-            // Render Enemy + Badge
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
             document.getElementById('e-rar').innerText = enemy.rar;
             document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
@@ -353,9 +352,8 @@
             document.getElementById(id).classList.add('active'); el.classList.add('active');
             
             if(id === 'profil') {
-                // Ensure backward compatibility: Look up type from heroPool based on ID
                 document.getElementById('inv-grid').innerHTML = db.inv.map(h => {
-                    const baseHero = heroPool.find(p => p.id === h.id) || { type: 'FIST' }; // Fallback
+                    const baseHero = heroPool.find(p => p.id === h.id) || { type: 'FIST' };
                     return `
                     <div class="card-item" style="background-image:url('${h.img}')">
                         <div class="rarity ${h.rar}">${h.rar}</div>
