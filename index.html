@@ -27,21 +27,34 @@
         .SR { background: var(--purple); color: #fff; }
         .R { background: var(--blue); color: #fff; }
 
-        .type-badge { position: absolute; top: 5px; left: 5px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; z-index: 5; border: 1px solid rgba(255,255,255,0.6); }
-        .type-FIST { background: #e74c3c; }
-        .type-ESPER { background: #9b59b6; }
-        .type-TECH { background: #3498db; }
-        .type-BLADE { background: #f1c40f; color: #000; }
-        
-        @keyframes glow-lr { from { box-shadow: 0 0 10px #f00; } to { box-shadow: 0 0 25px #ff0; } }
+        /* GACHA ANIMATION */
+        @keyframes gachaPop {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .gacha-anim { animation: gachaPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* BATTLE ANIMATIONS */
+        @keyframes shake {
+            0% { transform: translate(2px, 2px); }
+            25% { transform: translate(-2px, -2px); }
+            50% { transform: translate(2px, -2px); }
+            75% { transform: translate(-2px, 2px); }
+            100% { transform: translate(0, 0); }
+        }
+        .shake { animation: shake 0.2s infinite; }
+
+        .hp-container { width: 90%; height: 6px; background: #333; border-radius: 10px; margin: 5px auto; overflow: hidden; position: absolute; bottom: 5px; left: 5%; }
+        .hp-bar { height: 100%; width: 100%; transition: width 0.4s ease; }
+        .hp-p1 { background: var(--green); }
+        .hp-p2 { background: var(--red); }
 
         .card-item { position: relative; aspect-ratio: 2/3; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; }
-        .pwr-tag { position: absolute; bottom: 45px; width: 100%; background: rgba(0,0,0,0.85); color: var(--gold); font-size: 0.65rem; text-align: center; font-weight: 600; padding: 2px 0; }
-        .up-btn { width: 100%; background: var(--green); border: none; color: #fff; font-size: 0.7rem; padding: 5px 0; font-family: 'Bebas Neue'; cursor: pointer; position: absolute; bottom: 0; }
+        .pwr-tag { position: absolute; bottom: 5px; width: 100%; background: rgba(0,0,0,0.8); color: var(--gold); font-size: 0.65rem; text-align: center; font-weight: 600; padding: 2px 0; }
 
-        .fighter-box { height: 140px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; background-color: #111; position: relative; }
+        .fighter-box { height: 140px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; background-color: #111; position: relative; overflow: hidden; }
         
-        /* NAVBAR */
         .nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(10,10,10,0.95); display: flex; border-top: 1px solid #333; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 0.7rem; cursor: pointer; }
         .nav-item.active { color: var(--gold); }
@@ -49,11 +62,7 @@
 
         .btn { background: var(--red); color: #fff; border: none; padding: 12px; border-radius: 12px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; width: 100%; box-shadow: 0 4px 0 #800; margin-bottom: 5px; }
         
-        /* LOADING & VS SCREEN */
-        .loader { border: 5px solid #333; border-top: 5px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        #vs-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
+        #vs-overlay, #result-screen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
         .vs-card { width: 120px; height: 180px; border: 3px solid var(--gold); border-radius: 10px; background-size: cover; background-position: center; transition: 0.5s ease-out; }
 
         #login-screen { position: fixed; inset: 0; background: black; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -62,8 +71,7 @@
 <body onclick="window.initAudio()">
 
     <div id="flash-effect"></div>
-    <audio id="sfx-match" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
-
+    
     <div id="login-screen">
         <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3rem;">ONE PUNCH GACHA</h1>
         <p>Buka Game melalui Bot Telegram</p>
@@ -72,18 +80,24 @@
     <div id="vs-overlay">
         <h2 style="font-family:'Bebas Neue'; color:var(--red); font-size:3rem;">BATTLE FOUND!</h2>
         <div style="display:flex; align-items:center; gap:20px; margin: 20px 0;">
-            <div id="vs-p1" class="vs-card" style="transform: translateX(-100px); opacity: 0;"></div>
+            <div id="vs-p1" class="vs-card"></div>
             <b style="font-size:2rem; color:white;">VS</b>
-            <div id="vs-p2" class="vs-card" style="transform: translateX(100px); opacity: 0;"></div>
+            <div id="vs-p2" class="vs-card"></div>
         </div>
         <h1 id="vs-timer" style="font-family:'Bebas Neue'; font-size:4rem; color:var(--gold);">3</h1>
+    </div>
+
+    <div id="result-screen">
+        <h1 id="res-title" style="font-size:4rem; margin:0;">VICTORY</h1>
+        <p id="res-desc">You are the strongest!</p>
+        <button class="btn" style="width:200px; margin-top:20px;" onclick="location.reload()">CLOSE</button>
     </div>
 
     <video id="videoBg" playsinline loop muted>
         <source src="https://raw.githubusercontent.com/mabarrra670-max/Sik/2618c2c289f712966754adcf30adcf30af376696ccc73f/lv_0_20260101162558.mp4" type="video/mp4">
     </video>
 
-    <div class="header" style="padding: 15px; background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center;">
+    <div class="header" style="padding: 15px; background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index:10;">
         <div>
             <b id="p-name" style="color:var(--gold);">PLAYER</b><br>
             <span id="p-id" style="font-size:0.6rem; color:#888;">ID: ...</span>
@@ -107,11 +121,11 @@
         <button id="btn-match" class="btn" style="background:var(--orange);" onclick="window.startMatchmaking()">FIND ONLINE OPPONENT</button>
         
         <div id="loading-box" style="display:none; flex-direction:column; align-items:center; margin:10px;">
-            <div class="loader"></div>
-            <small id="online-status">Searching opponent...</small>
+            <div class="loader" style="border:4px solid #333; border-top:4px solid var(--gold); border-radius:50%; width:30px; height:30px; animation:spin 1s linear infinite;"></div>
+            <small>Searching...</small>
         </div>
 
-        <div style="width:100%; background:rgba(0,0,0,0.6); padding:15px; border-radius:15px; margin-top:10px; border:1px solid #333;">
+        <div id="arena-box" style="width:100%; background:rgba(0,0,0,0.6); padding:15px; border-radius:15px; margin-top:10px; border:1px solid #333;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="width:45%; text-align:center;">
                     <div id="p-fighter" class="fighter-box"></div>
@@ -124,7 +138,6 @@
                 </div>
             </div>
         </div>
-        <p style="font-size: 0.7rem; color: #888; margin-top: 10px;">Pilih hero di menu "Hero" sebelum bertarung.</p>
     </div>
 
     <div id="profil" class="screen">
@@ -141,8 +154,9 @@
     <script type="module">
         import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
 
-        // CONFIG SERVER RENDER
         const socket = io("https://cahsaitama.onrender.com");
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
         const heroPool = [
             { id:1, name:"Saitama God", rar:"LR", type:"FIST", rate:1, pwr:999999, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
@@ -155,8 +169,6 @@
             name:"PLAYER", id: "GUEST", dia:5000, inv:[], selected:null, pity:0 
         };
 
-        // TELEGRAM AUTH
-        const tg = window.Telegram.WebApp;
         if (tg.initDataUnsafe?.user) {
             db.name = (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name).toUpperCase();
             db.id = "TG-" + tg.initDataUnsafe.user.id;
@@ -181,6 +193,9 @@
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
+            const view = document.getElementById('single-view');
+            view.classList.remove('gacha-anim');
+
             let rolled;
             for(let i=0; i<t; i++) {
                 let r = Math.random()*100, cur=0;
@@ -189,10 +204,16 @@
                 let o = db.inv.find(x => x.id === rolled.id);
                 if(o) o.lvl++; else db.inv.push({...rolled, lvl:1});
             }
-            document.getElementById('single-view').style.backgroundImage = `url('${rolled.img}')`;
-            document.getElementById('gacha-rarity').innerText = rolled.rar;
-            document.getElementById('gacha-rarity').className = `rarity ${rolled.rar}`;
-            window.save();
+
+            if(rolled.rar === 'LR' || rolled.rar === 'SSR') tg.HapticFeedback.notificationOccurred('success');
+
+            setTimeout(() => {
+                view.style.backgroundImage = `url('${rolled.img}')`;
+                view.classList.add('gacha-anim');
+                document.getElementById('gacha-rarity').innerText = rolled.rar;
+                document.getElementById('gacha-rarity').className = `rarity ${rolled.rar}`;
+                window.save();
+            }, 50);
         };
 
         function updateInventory() {
@@ -205,38 +226,24 @@
 
         window.selectHero = (id) => {
             db.selected = db.inv.find(x => x.id === id);
-            alert("Hero selected for battle!");
+            tg.HapticFeedback.impactOccurred('medium');
             document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`;
             document.getElementById('p-pwr-val').innerText = "PWR: " + (db.selected.pwr * db.selected.lvl).toLocaleString();
+            alert(db.selected.name + " Selected!");
         };
 
-        // --- MULTIPLAYER LOGIC ---
         window.startMatchmaking = () => {
             if(!db.selected) return alert("Pilih hero dulu di menu Hero!");
             document.getElementById('loading-box').style.display = 'flex';
             document.getElementById('btn-match').style.display = 'none';
-
-            socket.emit("find_match", {
-                name: db.name,
-                img: db.selected.img,
-                pwr: db.selected.pwr * db.selected.lvl
-            });
+            socket.emit("find_match", { name: db.name, img: db.selected.img, pwr: db.selected.pwr * db.selected.lvl });
         };
 
         socket.on("match_found", (data) => {
-            document.getElementById('sfx-match').play();
             const vs = document.getElementById('vs-overlay');
-            const p1 = document.getElementById('vs-p1');
-            const p2 = document.getElementById('vs-p2');
-            
             vs.style.display = 'flex';
-            p1.style.backgroundImage = `url('${db.selected.img}')`;
-            p2.style.backgroundImage = `url('${data.opponent.img}')`;
-
-            setTimeout(() => {
-                p1.style.transform = "translateX(0)"; p1.style.opacity = "1";
-                p2.style.transform = "translateX(0)"; p2.style.opacity = "1";
-            }, 100);
+            document.getElementById('vs-p1').style.backgroundImage = `url('${db.selected.img}')`;
+            document.getElementById('vs-p2').style.backgroundImage = `url('${data.opponent.img}')`;
 
             let count = 3;
             let timer = setInterval(() => {
@@ -246,17 +253,55 @@
                     clearInterval(timer);
                     vs.style.display = 'none';
                     document.getElementById('loading-box').style.display = 'none';
-                    document.getElementById('btn-match').style.display = 'block';
-                    // Tampilkan data lawan di Arena
-                    document.getElementById('e-fighter').style.backgroundImage = `url('${data.opponent.img}')`;
-                    document.getElementById('e-pwr-val').innerText = "PWR: " + data.opponent.pwr.toLocaleString();
-                    alert("Battle Starts! (Logic Realtime Battle akan ditambahkan selanjutnya)");
+                    runBattle(data.opponent);
                 }
             }, 1000);
         });
+
+        function runBattle(opp) {
+            const p1Pwr = db.selected.pwr * db.selected.lvl;
+            const p2Pwr = opp.pwr;
+            
+            document.getElementById('e-fighter').style.backgroundImage = `url('${opp.img}')`;
+            document.getElementById('e-pwr-val').innerText = "PWR: " + p2Pwr.toLocaleString();
+
+            // Create HP Bars
+            document.getElementById('p-fighter').innerHTML = '<div class="hp-container"><div id="hp1" class="hp-bar hp-p1"></div></div>';
+            document.getElementById('e-fighter').innerHTML = '<div class="hp-container"><div id="hp2" class="hp-bar hp-p2"></div></div>';
+
+            let step = 0;
+            const fight = setInterval(() => {
+                step++;
+                document.getElementById('arena-box').classList.add('shake');
+                tg.HapticFeedback.impactOccurred('heavy');
+                
+                // Kurangi HP secara visual
+                if(p1Pwr > p2Pwr) {
+                    document.getElementById('hp2').style.width = (100 - (step*20)) + "%";
+                } else {
+                    document.getElementById('hp1').style.width = (100 - (step*20)) + "%";
+                }
+
+                setTimeout(() => document.getElementById('arena-box').classList.remove('shake'), 150);
+
+                if(step >= 5) {
+                    clearInterval(fight);
+                    showFinalResult(p1Pwr >= p2Pwr);
+                }
+            }, 600);
+        }
+
+        function showFinalResult(win) {
+            const screen = document.getElementById('result-screen');
+            const title = document.getElementById('res-title');
+            screen.style.display = 'flex';
+            title.innerText = win ? "VICTORY" : "DEFEAT";
+            title.style.color = win ? "var(--gold)" : "var(--red)";
+            if(win) tg.HapticFeedback.notificationOccurred('success');
+        }
 
         window.initAudio = () => { document.getElementById('videoBg').muted = false; document.getElementById('videoBg').play(); };
         window.save();
     </script>
 </body>
-                    </html>
+    </html>
