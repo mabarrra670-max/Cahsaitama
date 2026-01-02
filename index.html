@@ -3,25 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>One Punch Gacha: Online Leaderboard</title>
+    <title>One Punch Gacha: Online Leaderboard - Fixed Version</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffd700; --red: #ff4757; --dark: #0a0a0a; --green: #2ecc71; --purple: #a020f0; --blue: #3498db; --orange: #e67e22; }
-        body { margin: 0; background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        #videoBg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.25); pointer-events: none; }
-        #flash-effect { position: fixed; inset: 0; background: white; opacity: 0; z-index: 10000; pointer-events: none; transition: 0.2s; }
+        /* CSS ROOT VARIABLES */
+        :root { 
+            --gold: #ffd700; 
+            --red: #ff4757; 
+            --dark: #0a0a0a; 
+            --green: #2ecc71; 
+            --purple: #a020f0; 
+            --blue: #3498db; 
+            --orange: #e67e22; 
+        }
 
+        /* RESET & BASE STYLES */
+        body { 
+            margin: 0; 
+            background: var(--dark); 
+            color: #fff; 
+            font-family: 'Poppins', sans-serif; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        
+        /* BACKGROUND & EFFECTS */
+        #videoBg { 
+            position: fixed; 
+            inset: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            z-index: -2; 
+            filter: brightness(0.25); 
+            pointer-events: none; 
+        }
+
+        #flash-effect { 
+            position: fixed; 
+            inset: 0; 
+            background: white; 
+            opacity: 0; 
+            z-index: 10000; 
+            pointer-events: none; 
+            transition: 0.2s; 
+        }
+
+        /* SCREENS & ANIMATIONS */
         .screen { 
-            flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; 
+            flex: 1; 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
             overflow-y: auto; 
             padding-bottom: 120px; 
             z-index: 5;
-            opacity: 0; transform: translateY(15px); transition: 0.4s ease;
+            opacity: 0; 
+            transform: translateY(15px); 
+            transition: 0.4s ease;
             -webkit-overflow-scrolling: touch;
         }
-        .screen.active { display: flex; opacity: 1; transform: translateY(0); }
 
+        .screen.active { 
+            display: flex; 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+
+        /* INVENTORY GRID */
         #inv-grid { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -30,45 +82,253 @@
             padding-bottom: 20px; 
         }
 
-        .rarity { position: absolute; top: 5px; right: 5px; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; font-family: 'Bebas Neue'; z-index: 5; }
+        /* CARD STYLING */
+        .rarity { 
+            position: absolute; 
+            top: 5px; 
+            right: 5px; 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            font-size: 0.7rem; 
+            font-family: 'Bebas Neue'; 
+            z-index: 5; 
+        }
+
         .LR { background: linear-gradient(45deg, #ff0000, #ffd700); color: #fff; box-shadow: 0 0 15px #f00; animation: glow-lr 1s infinite alternate; }
         .SSR { background: var(--gold); color: #000; box-shadow: 0 0 10px var(--gold); }
         .SR { background: var(--purple); color: #fff; }
         .R { background: var(--blue); color: #fff; }
         
-        /* Badge Elemen */
-        .type-badge { position: absolute; top: 5px; left: 5px; padding: 2px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: bold; text-transform: uppercase; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.3); z-index: 5; color: #fff; }
+        .type-badge { 
+            position: absolute; 
+            top: 5px; 
+            left: 5px; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.55rem; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            background: rgba(0,0,0,0.8); 
+            border: 1px solid rgba(255,255,255,0.3); 
+            z-index: 5; 
+            color: #fff; 
+        }
+
         .type-Physical { border-color: #ff4757; color: #ff4757; }
         .type-Energy { border-color: #3498db; color: #3498db; }
         .type-Tactics { border-color: #2ecc71; color: #2ecc71; }
 
-        @keyframes glow-lr { from { box-shadow: 0 0 10px #f00; } to { box-shadow: 0 0 25px #ff0; } }
+        @keyframes glow-lr { 
+            from { box-shadow: 0 0 10px #f00; } 
+            to { box-shadow: 0 0 25px #ff0; } 
+        }
 
-        .card-item { position: relative; aspect-ratio: 2/3; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; transition: 0.3s; }
-        .pwr-tag { position: absolute; bottom: 45px; width: 100%; background: rgba(0,0,0,0.85); color: var(--gold); font-size: 0.65rem; text-align: center; font-weight: 600; padding: 2px 0; }
-        .card-actions { position: absolute; bottom: 0; width: 100%; display: flex; }
-        .up-btn { flex: 2; background: var(--green); border: none; color: #fff; font-size: 0.7rem; padding: 5px 0; font-family: 'Bebas Neue'; cursor: pointer; }
+        .card-item { 
+            position: relative; 
+            aspect-ratio: 2/3; 
+            border: 1px solid rgba(255,215,0,0.3); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            background-color: #222; 
+            background-size: cover; 
+            background-position: center; 
+            transition: 0.3s; 
+        }
 
-        .battle-log { width: 100%; height: 50px; background: rgba(0,0,0,0.6); margin-top: 10px; border-radius: 8px; font-size: 0.75rem; padding: 5px; overflow: hidden; color: #ccc; border: 1px solid #333; text-align: center; }
-        .fighter-box { height: 140px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; background-color: #111; position: relative; transition: 0.2s; }
-        .hit-anim { animation: shake 0.2s; border-color: var(--red); }
-        @keyframes shake { 0%{transform:translateX(0)} 25%{transform:translateX(5px)} 50%{transform:translateX(-5px)} 100%{transform:translateX(0)} }
+        .pwr-tag { 
+            position: absolute; 
+            bottom: 45px; 
+            width: 100%; 
+            background: rgba(0,0,0,0.85); 
+            color: var(--gold); 
+            font-size: 0.65rem; 
+            text-align: center; 
+            font-weight: 600; 
+            padding: 2px 0; 
+        }
 
-        #login-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .login-btn { background: #fff; color: #333; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .header { padding: 15px 20px; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 10; backdrop-filter: blur(5px); }
-        .diamond-pill { background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); color: var(--gold); font-weight: 600; }
+        .card-actions { 
+            position: absolute; 
+            bottom: 0; 
+            width: 100%; 
+            display: flex; 
+        }
+
+        .up-btn { 
+            flex: 2; 
+            background: var(--green); 
+            border: none; 
+            color: #fff; 
+            font-size: 0.7rem; 
+            padding: 5px 0; 
+            font-family: 'Bebas Neue'; 
+            cursor: pointer; 
+        }
+
+        /* BATTLE UI ELEMENTS */
+        .battle-log { 
+            width: 100%; 
+            height: 50px; 
+            background: rgba(0,0,0,0.6); 
+            margin-top: 10px; 
+            border-radius: 8px; 
+            font-size: 0.75rem; 
+            padding: 5px; 
+            overflow: hidden; 
+            color: #ccc; 
+            border: 1px solid #333; 
+            text-align: center; 
+        }
+
+        .fighter-box { 
+            height: 140px; 
+            border: 2px solid #444; 
+            border-radius: 15px; 
+            background-size: cover; 
+            background-position: center; 
+            background-color: #111; 
+            position: relative; 
+            transition: 0.2s; 
+        }
+
+        .hit-anim { 
+            animation: shake 0.2s; 
+            border-color: var(--red); 
+        }
+
+        @keyframes shake { 
+            0%{transform:translateX(0)} 
+            25%{transform:translateX(5px)} 
+            50%{transform:translateX(-5px)} 
+            100%{transform:translateX(0)} 
+        }
+
+        /* AUTH & HEADER */
+        #login-screen { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.95); 
+            z-index: 9999; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+        }
+
+        .login-btn { 
+            background: #fff; 
+            color: #333; 
+            border: none; 
+            padding: 12px 25px; 
+            border-radius: 30px; 
+            font-weight: 600; 
+            font-family: 'Poppins'; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            transition: 0.3s; 
+        }
+
+        .header { 
+            padding: 15px 20px; 
+            background: rgba(0,0,0,0.9); 
+            border-bottom: 2px solid var(--gold); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 10; 
+            backdrop-filter: blur(5px); 
+        }
+
+        .diamond-pill { 
+            background: rgba(255,215,0,0.1); 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            border: 1px solid var(--gold); 
+            color: var(--gold); 
+            font-weight: 600; 
+        }
         
-        .nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: rgba(10,10,10,0.95); display: flex; border-top: 1px solid #333; z-index: 100; backdrop-filter: blur(10px); padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--gold); transform: translateY(-5px); }
-        .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }
+        /* NAVIGATION BAR */
+        .nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            height: 85px; 
+            background: rgba(10,10,10,0.95); 
+            display: flex; 
+            border-top: 1px solid #333; 
+            z-index: 100; 
+            backdrop-filter: blur(10px); 
+            padding-bottom: env(safe-area-inset-bottom); 
+        }
 
-        .btn { background: var(--red); color: #fff; border: none; padding: 12px; border-radius: 12px; font-family: 'Bebas Neue'; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 0 #800; }
-        .hp-bar { width: 100%; height: 8px; background: #333; margin-top: 8px; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
-        .hp-fill { height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); width: 100%; transition: 0.3s; }
-        .battle-pwr-label { font-size: 0.75rem; color: var(--gold); font-weight: 600; margin-top: 4px; display: block; }
-        .id-pill { font-size: 0.6rem; color: #888; background: #222; padding: 2px 6px; border-radius: 4px; margin-top: 2px; display: inline-block; }
+        .nav-item { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: #666; 
+            font-size: 0.7rem; 
+            cursor: pointer; 
+            transition: 0.3s; 
+        }
+
+        .nav-item.active { 
+            color: var(--gold); 
+            transform: translateY(-5px); 
+        }
+
+        .nav-item span { 
+            font-size: 1.5rem; 
+            margin-bottom: 4px; 
+        }
+
+        /* BUTTONS & HP BARS */
+        .btn { 
+            background: var(--red); 
+            color: #fff; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 12px; 
+            font-family: 'Bebas Neue'; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: 0.2s; 
+            box-shadow: 0 4px 0 #800; 
+        }
+
+        .hp-bar { 
+            width: 100%; 
+            height: 8px; 
+            background: #333; 
+            margin-top: 8px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            border: 1px solid #444; 
+        }
+
+        .hp-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #2ecc71, #27ae60); 
+            width: 100%; 
+            transition: 0.3s; 
+        }
+
+        .id-pill { 
+            font-size: 0.6rem; 
+            color: #888; 
+            background: #222; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            margin-top: 2px; 
+            display: inline-block; 
+        }
     </style>
 </head>
 <body onclick="window.initAudio()">
@@ -77,7 +337,6 @@
 
     <div id="login-screen">
         <h1 style="font-family:'Bebas Neue'; color:var(--gold); font-size:3.5rem; text-shadow: 0 0 20px rgba(255,215,0,0.5);">ONE PUNCH GACHA</h1>
-        <p style="color:#aaa; margin-bottom:20px;">Sign in to Compete Globally</p>
         <button class="login-btn" onclick="window.loginGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign in with Google
         </button>
@@ -97,20 +356,23 @@
     </div>
 
     <div id="gacha" class="screen active">
-        <h2 style="font-family:'Bebas Neue'; color:var(--gold); letter-spacing:2px;">SUMMON HERO</h2>
+        <h2 style="font-family:'Bebas Neue'; color:var(--gold);">SUMMON HERO</h2>
         <div style="background:rgba(255,215,0,0.1); padding:8px 20px; border-radius:20px; border:1px solid var(--gold); margin-bottom:15px;">
             <small style="font-weight:600;">PITY (LR AT 50): <span id="pity-count" style="color:var(--red);">0</span>/50</small>
         </div>
+        
         <div id="single-view" style="position:relative; width:220px; height:310px; margin:10px 0; perspective:1000px;">
             <div id="card-box" style="width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);">
-                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background:linear-gradient(45deg, #111, #222); border-radius:15px; border:2px solid #444; display:flex; align-items:center; justify-content:center; font-size:4rem; color:#333; font-family:'Bebas Neue';">?</div>
-                <div id="card-img" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); border-radius:15px; border:3px solid var(--gold); background-size:cover; background-position:center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; background:#222; border-radius:15px; border:2px solid #444; display:flex; align-items:center; justify-content:center; font-size:4rem; color:#333; font-family:'Bebas Neue';">?</div>
+                <div id="card-img" style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg); border-radius:15px; border:3px solid var(--gold); background-size:cover; background-position:center;">
                     <div id="gacha-rarity" class="rarity"></div>
                     <div id="gacha-type" class="type-badge"></div>
                 </div>
             </div>
         </div>
+
         <div id="multi-view" style="display:none; grid-template-columns:repeat(5,1fr); gap:8px; width:100%; padding:10px;"></div>
+        
         <div style="display:flex; gap:12px; width:100%; margin-top:20px;">
             <button class="btn" onclick="window.pull(1)">1x PULL</button>
             <button class="btn" style="background:linear-gradient(to bottom, #b8860b, #8b6508);" onclick="window.pull(10)">10x PULL</button>
@@ -118,44 +380,38 @@
     </div>
 
     <div id="shop" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.8rem;">DAILY SUPPLY</h3>
-        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; border:1px solid #333; width:100%; text-align:center;">
-            <p>Claim your daily diamonds!</p>
-            <button id="daily-btn" class="btn" style="background:var(--green);" onclick="window.claimDaily()">CLAIM 1000 💎</button>
-            <div id="daily-timer" style="font-size:0.9rem; color:var(--gold); margin-top:15px;"></div>
-        </div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">DAILY SUPPLY</h3>
+        <button id="daily-btn" class="btn" style="background:var(--green);" onclick="window.claimDaily()">CLAIM 1000 💎</button>
+        <div id="daily-timer" style="font-size:0.9rem; color:var(--gold); margin-top:15px;"></div>
     </div>
 
     <div id="pvp" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">BATTLE ARENA</h3>
-        <p style="font-size:0.7rem; color:#888; margin-top:-10px;">Physical > Tactics > Energy > Physical</p>
-        <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px; padding:10px; background:rgba(0,0,0,0.4); border-radius:15px;"></div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">ARENA</h3>
+        <div id="hero-select-list" style="display:flex; gap:10px; overflow-x:auto; width:100%; min-height:110px;"></div>
+        
         <div style="width:100%; background:rgba(0,0,0,0.8); padding:15px; border-radius:15px; border:1px solid #444; margin-top:15px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="text-align:center; width:45%;">
+            <div style="display:flex; justify-content:space-between;">
+                <div style="width:45%;">
                     <div id="p-fighter" class="fighter-box"><div id="p-rar" class="rarity"></div><div id="p-type-battle" class="type-badge"></div></div>
                     <div class="hp-bar"><div id="p-hp" class="hp-fill"></div></div>
-                    <span id="p-pwr-val" class="battle-pwr-label">PWR: 0</span>
                 </div>
-                <b style="color:var(--red); font-size:1.5rem; font-family:'Bebas Neue';">VS</b>
-                <div style="text-align:center; width:45%;">
+                <div style="width:45%;">
                     <div id="e-fighter" class="fighter-box"><div id="e-rar" class="rarity"></div><div id="e-type-battle" class="type-badge"></div></div>
                     <div class="hp-bar"><div id="e-hp" class="hp-fill"></div></div>
-                    <span id="e-pwr-val" class="battle-pwr-label">PWR: ???</span>
                 </div>
             </div>
-            <div id="battle-log" class="battle-log">Ready...</div>
+            <div id="battle-log" class="battle-log">Choose Hero...</div>
         </div>
         <button id="btn-fight" class="btn" style="margin-top:20px;" onclick="window.startBattle()" disabled>START FIGHT</button>
     </div>
 
     <div id="leaderboard" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">TOP RANKING</h3>
-        <div id="rank-list" style="width:100%; background:rgba(0,0,0,0.6); border:1px solid var(--gold); border-radius:15px;"></div>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">RANKING</h3>
+        <div id="rank-list" style="width:100%;"></div>
     </div>
 
     <div id="profil" class="screen">
-        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">MY COLLECTION</h3>
+        <h3 style="font-family:'Bebas Neue'; color:var(--gold);">COLLECTION</h3>
         <div id="inv-grid"></div>
     </div>
 
@@ -172,14 +428,14 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAo3ztYZX8L9dK-K4dg6HZ7XuOJwp5JCTE",
-            authDomain: "gachasaitama.firebaseapp.com",
-            projectId: "gachasaitama",
-            storageBucket: "gachasaitama.firebasestorage.app",
-            messagingSenderId: "992321909458",
-            appId: "1:992321909458:web:da0f8aa2c9b4e1c91f330b",
-            measurementId: "G-CN9J4NLLJG"
+        // Firebase Configuration
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAo3ztYZX8L9dK-K4dg6HZ7XuOJwp5JCTE", 
+            authDomain: "gachasaitama.firebaseapp.com", 
+            projectId: "gachasaitama", 
+            storageBucket: "gachasaitama.firebasestorage.app", 
+            messagingSenderId: "992321909458", 
+            appId: "1:992321909458:web:da0f8aa2c9b4e1c91f330b" 
         };
 
         const app = initializeApp(firebaseConfig);
@@ -187,6 +443,7 @@
         const db_fs = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
+        // HERO MASTER DATA
         const heroPool = [
             { id:1, name:"Saitama God", rar:"LR", rate:0.01, pwr:999999, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png" },
             { id:2, name:"Cosmic Garou", rar:"LR", rate:0.09, pwr:65000, type:"Energy", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png" },
@@ -202,106 +459,115 @@
             { id:13, name:"Mumen Rider", rar:"R", rate:64.9, pwr:1000, type:"Physical", img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/mumenrider.png" }
         ];
 
+        // LOAD DATA
         let db = JSON.parse(localStorage.getItem('OPG_POWER_FIX')) || { 
-            name:"PLAYER", id: "OPG-TEMP", dia:5000, inv:[], selected:null, lastClaim:0, pity:0 
+            name:"PLAYER", 
+            id: "OPG-TEMP", 
+            dia:5000, 
+            inv:[], 
+            selected:null, 
+            lastClaim:0, 
+            pity:0 
         };
 
-        // --- SISTEM MIGRASI DATA OTOMATIS (Mencegah Undefined) ---
+        // --- MIGRATION SYSTEM (MENCEGAH UNDEFINED & FIX GAMBAR) ---
         db.inv = db.inv.map(item => {
-            const ref = heroPool.find(h => h.id === item.id);
-            if(ref) {
-                if(!item.type) item.type = ref.type;
-                if(!item.img) item.img = ref.img;
+            const master = heroPool.find(h => h.id === item.id);
+            if(master) {
+                if(!item.type || item.type === "UNDEFINED") {
+                    item.type = master.type;
+                }
+                // Paksa update gambar jika link lama rusak
+                item.img = master.img;
             }
             return item;
         });
 
-        window.loginGoogle = () => {
-            signInWithPopup(auth, provider).catch(e => alert("Login Error: " + e.message));
-        };
+        // LOGIN HANDLERS
+        window.loginGoogle = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('login-screen').style.display = 'none';
-                db.name = user.displayName.split(' ')[0].toUpperCase();
-                db.uid = user.uid;
-                db.id = "OPG-" + user.uid.substring(0, 5).toUpperCase();
-                window.save();
-            } else {
-                document.getElementById('login-screen').style.display = 'flex';
-            }
+        onAuthStateChanged(auth, (user) => { 
+            if (user) { 
+                document.getElementById('login-screen').style.display = 'none'; 
+                db.name = user.displayName.split(' ')[0].toUpperCase(); 
+                db.uid = user.uid; 
+                db.id = "OPG-" + user.uid.substring(0, 5).toUpperCase(); 
+                window.save(); 
+            } 
         });
 
+        // SAVE & SYNC FUNCTION
         window.save = async () => {
             localStorage.setItem('OPG_POWER_FIX', JSON.stringify(db));
             document.getElementById('p-dia').innerText = db.dia.toLocaleString();
             document.getElementById('p-name').innerText = db.name;
             document.getElementById('p-id').innerText = "ID: " + db.id;
             document.getElementById('pity-count').innerText = db.pity;
-            updateDailyStatus();
-
+            
             if(db.uid) {
                 let totalPwr = db.inv.reduce((sum, h) => sum + (h.pwr * Math.pow(h.lvl, 1.5)), 0);
-                try {
-                    await setDoc(doc(db_fs, "leaderboard", db.uid), {
-                        name: db.name,
-                        pwr: Math.floor(totalPwr),
-                        id: db.id
-                    });
-                } catch(e) { console.error("Leaderboard Sync Failed", e); }
+                try { 
+                    await setDoc(doc(db_fs, "leaderboard", db.uid), { 
+                        name: db.name, 
+                        pwr: Math.floor(totalPwr), 
+                        id: db.id 
+                    }); 
+                } catch(e) { console.log("Firebase sync fail"); }
             }
         };
 
+        // GACHA LOGIC
         window.pull = (t) => {
             if(db.dia < t*100) return alert("Diamond Kurang!");
             db.dia -= t*100;
             const flash = document.getElementById('flash-effect');
-            
-            let res = [];
-            let hasBest = false;
+            let res = [], hasBest = false;
+
             for(let i=0; i<t; i++){
                 db.pity++;
                 let rolled;
-                if(db.pity >= 50) { rolled = heroPool[Math.floor(Math.random() * 2)]; db.pity = 0; }
-                else {
+                if(db.pity >= 50) { 
+                    rolled = heroPool[Math.floor(Math.random() * 2)]; 
+                    db.pity = 0; 
+                } else {
                     let r = Math.random()*100, cur=0;
-                    for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
+                    for(let h of heroPool){ 
+                        cur+=h.rate; 
+                        if(r<=cur){ rolled=h; break; } 
+                    }
                     if(!rolled) rolled = heroPool[heroPool.length-1];
                     if(rolled.rar === "LR" || rolled.rar === "SSR") hasBest = true;
                     if(rolled.rar === "LR") db.pity = 0;
                 }
                 res.push(rolled);
                 let o = db.inv.find(x => x.id === rolled.id);
-                if(o) {
-                    o.dupes++;
-                    o.type = rolled.type; // Update type jika data lama
+                if(o) { 
+                    o.dupes++; 
+                    o.type = rolled.type; 
+                    o.img = rolled.img; 
                 } else {
                     db.inv.push({...rolled, lvl:1, dupes:0});
                 }
             }
 
-            // Efek Flash
             flash.style.background = hasBest ? "gold" : "white";
-            flash.style.opacity = '1';
-            setTimeout(() => flash.style.opacity = '0', 150);
-            
-            const sfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3');
-            sfx.play().catch(e => {});
-
+            flash.style.opacity = '1'; 
+            setTimeout(() => flash.style.opacity = '0', 200);
             window.save();
+
             if(t===1){
-                document.getElementById('multi-view').style.display='none';
+                document.getElementById('multi-view').style.display='none'; 
                 document.getElementById('single-view').style.display='block';
                 document.getElementById('card-img').style.backgroundImage = `url('${res[0].img}')`;
-                document.getElementById('gacha-rarity').innerText = res[0].rar;
+                document.getElementById('gacha-rarity').innerText = res[0].rar; 
                 document.getElementById('gacha-rarity').className = `rarity ${res[0].rar}`;
-                document.getElementById('gacha-type').innerText = res[0].type;
+                document.getElementById('gacha-type').innerText = res[0].type; 
                 document.getElementById('gacha-type').className = `type-badge type-${res[0].type}`;
-                const cardBox = document.getElementById('card-box');
+                const cardBox = document.getElementById('card-box'); 
                 cardBox.style.transform = "rotateY(180deg)";
                 setTimeout(()=> cardBox.style.transform="rotateY(0deg)", 2000);
             } else {
-                document.getElementById('single-view').style.display='none';
+                document.getElementById('single-view').style.display='none'; 
                 document.getElementById('multi-view').style.display='grid';
                 document.getElementById('multi-view').innerHTML = res.map(h => `
                     <div class="card-item">
@@ -312,89 +578,90 @@
             }
         };
 
+        // BATTLE LOGIC
         window.startBattle = () => {
-            if(!db.selected) return alert("Pilih Hero dulu!");
-            const btn = document.getElementById('btn-fight');
-            const log = document.getElementById('battle-log');
+            if(!db.selected) return;
+            const btn = document.getElementById('btn-fight'); 
             btn.disabled = true;
-            
             let enemy = heroPool[Math.floor(Math.random()*heroPool.length)];
             let ePwr = Math.floor(enemy.pwr * (Math.random() * 1.5 + 0.5));
             let pPwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
             
-            // LOGIKA COUNTER
-            let bonusText = "";
+            // Elemen Advantage
             if((db.selected.type === "Physical" && enemy.type === "Tactics") || 
                (db.selected.type === "Tactics" && enemy.type === "Energy") || 
                (db.selected.type === "Energy" && enemy.type === "Physical")) {
-                pPwr = Math.floor(pPwr * 1.3);
-                bonusText = " <span style='color:var(--green)'>(ADVANTAGE!)</span>";
+                pPwr *= 1.3;
             }
 
             document.getElementById('e-fighter').style.backgroundImage = `url('${enemy.img}')`;
-            document.getElementById('e-rar').innerText = enemy.rar;
+            document.getElementById('e-rar').innerText = enemy.rar; 
             document.getElementById('e-rar').className = `rarity ${enemy.rar}`;
-            document.getElementById('e-type-battle').innerText = enemy.type;
+            document.getElementById('e-type-battle').innerText = enemy.type; 
             document.getElementById('e-type-battle').className = `type-badge type-${enemy.type}`;
-            document.getElementById('e-pwr-val').innerText = `PWR: ${ePwr.toLocaleString()}`;
             
             let php = 100, ehp = 100;
-            log.innerHTML = `Fight: ${db.selected.name} vs ${enemy.name}${bonusText}`;
-            
             const loop = setInterval(() => {
-                const hitSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'); hitSfx.play().catch(()=>{});
-                document.getElementById('e-fighter').classList.add('hit-anim');
+                document.getElementById('e-fighter').classList.add('hit-anim'); 
                 document.getElementById('p-fighter').classList.add('hit-anim');
-                setTimeout(() => {
-                    document.getElementById('e-fighter').classList.remove('hit-anim');
-                    document.getElementById('p-fighter').classList.remove('hit-anim');
+                setTimeout(() => { 
+                    document.getElementById('e-fighter').classList.remove('hit-anim'); 
+                    document.getElementById('p-fighter').classList.remove('hit-anim'); 
                 }, 200);
-
-                ehp -= (pPwr / (ePwr * 0.8)) * 12; php -= (ePwr / (pPwr * 0.8)) * 12;
-                document.getElementById('p-hp').style.width = Math.max(0, php) + "%";
+                
+                ehp -= (pPwr / (ePwr * 0.8)) * 12; 
+                php -= (ePwr / (pPwr * 0.8)) * 12;
+                
+                document.getElementById('p-hp').style.width = Math.max(0, php) + "%"; 
                 document.getElementById('e-hp').style.width = Math.max(0, ehp) + "%";
-
-                if(ehp <= 0 || php <= 0) {
-                    clearInterval(loop);
+                
+                if(ehp <= 0 || php <= 0) { 
+                    clearInterval(loop); 
                     if(ehp <= 0) { 
-                        db.dia += 100; window.save(); 
-                        log.innerHTML = "<b style='color:var(--green)'>VICTORY! +100 💎</b>";
+                        db.dia += 100; 
+                        window.save(); 
+                        alert("VICTORY!"); 
                     } else { 
-                        log.innerHTML = "<b style='color:var(--red)'>DEFEAT!</b>";
-                    }
-                    btn.disabled = false;
+                        alert("DEFEAT!"); 
+                    } 
+                    btn.disabled = false; 
                 }
             }, 800);
         };
 
+        // NAVIGATION LOGIC
         window.nav = async (id, el) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); el.classList.add('active');
-            
+            document.getElementById(id).classList.add('active'); 
+            el.classList.add('active');
+
             if(id === 'profil') {
                 document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
                     <div class="card-item" style="background-image:url('${h.img}')">
                         <div class="rarity ${h.rar}">${h.rar}</div>
                         <div class="type-badge type-${h.type || 'Physical'}">${h.type || 'Physical'}</div>
                         <div class="pwr-tag">PWR: ${Math.floor(h.pwr * Math.pow(h.lvl, 1.5)).toLocaleString()}</div>
-                        <div class="card-actions"><button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl}</button></div>
+                        <div class="card-actions">
+                            <button class="up-btn" onclick="window.upHero(${h.id})">UP LVL ${h.lvl}</button>
+                        </div>
                     </div>`).join('');
             }
 
             if(id === 'leaderboard') {
                 const q = query(collection(db_fs, "leaderboard"), orderBy("pwr", "desc"), limit(10));
                 const snap = await getDocs(q);
-                let html = ""; let rank = 1;
-                snap.forEach(doc => {
-                    let d = doc.data();
-                    html += `<div style="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center; ${d.id === db.id ? 'background:rgba(255,215,0,0.15);' : ''}">
+                let html = ""; 
+                let rank = 1;
+                snap.forEach(doc => { 
+                    let d = doc.data(); 
+                    html += `<div style="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between;">
                         <span><b>${rank}.</b> ${d.name}</span>
                         <b style="color:var(--gold);">${d.pwr.toLocaleString()}</b>
-                    </div>`;
-                    rank++;
+                    </div>`; 
+                    rank++; 
                 });
-                document.getElementById('rank-list').innerHTML = html || '<div style="padding:20px;">No data...</div>';
+                document.getElementById('rank-list').innerHTML = html;
             }
 
             if(id === 'pvp') {
@@ -406,45 +673,63 @@
             }
         };
 
-        window.upHero = (id) => {
-            let h = db.inv.find(x => x.id === id);
-            if(h.dupes >= 5) { h.dupes -= 5; h.lvl++; window.save(); window.nav('profil', document.querySelectorAll('.nav-item')[4]); }
-            else alert("Butuh 5 duplikat!");
+        // HELPER FUNCTIONS
+        window.upHero = (id) => { 
+            let h = db.inv.find(x => x.id === id); 
+            if(h.dupes >= 5) { 
+                h.dupes -= 5; 
+                h.lvl++; 
+                window.save(); 
+                window.nav('profil', document.querySelectorAll('.nav-item')[4]); 
+            } else { 
+                alert("Butuh 5 kartu yang sama untuk naik level!"); 
+            } 
         };
 
-        window.prep = (id) => {
-            db.selected = db.inv.find(x => x.id === id);
-            let pwr = Math.floor(db.selected.pwr * Math.pow(db.selected.lvl, 1.5));
-            document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`;
-            document.getElementById('p-rar').innerText = db.selected.rar;
-            document.getElementById('p-rar').className = `rarity ${db.selected.rar}`;
-            document.getElementById('p-type-battle').innerText = db.selected.type;
-            document.getElementById('p-type-battle').className = `type-badge type-${db.selected.type}`;
-            document.getElementById('p-pwr-val').innerText = `PWR: ${pwr.toLocaleString()}`;
-            document.getElementById('btn-fight').disabled = false;
+        window.prep = (id) => { 
+            db.selected = db.inv.find(x => x.id === id); 
+            document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`; 
+            document.getElementById('p-rar').innerText = db.selected.rar; 
+            document.getElementById('p-rar').className = `rarity ${db.selected.rar}`; 
+            document.getElementById('p-type-battle').innerText = db.selected.type; 
+            document.getElementById('p-type-battle').className = `type-badge type-${db.selected.type}`; 
+            document.getElementById('btn-fight').disabled = false; 
         };
 
-        window.claimDaily = () => {
-            let now = Date.now();
-            if (now - db.lastClaim >= 86400000) { db.dia += 1000; db.lastClaim = now; window.save(); alert("1000 Diamonds Claimed!"); }
+        window.claimDaily = () => { 
+            let now = Date.now(); 
+            if (now - db.lastClaim >= 86400000) { 
+                db.dia += 1000; 
+                db.lastClaim = now; 
+                window.save(); 
+                alert("Claimed 1000 Diamonds!"); 
+            } else { 
+                alert("Belum waktunya claim!"); 
+            }
         };
 
-        function updateDailyStatus() {
-            let btn = document.getElementById('daily-btn');
-            if(!btn) return;
-            let diff = Date.now() - db.lastClaim;
-            if (diff < 86400000) {
-                btn.disabled = true;
-                let rem = 86400000 - diff;
-                let h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
-                document.getElementById('daily-timer').innerText = `NEXT: ${h}h ${m}m ${s}s`;
-            } else { btn.disabled = false; document.getElementById('daily-timer').innerText = "READY!"; }
+        function updateDailyStatus() { 
+            let btn = document.getElementById('daily-btn'); 
+            if(!btn) return; 
+            let diff = Date.now() - db.lastClaim; 
+            if (diff < 86400000) { btn.disabled = true; } 
+            else { btn.disabled = false; } 
         }
+
         setInterval(updateDailyStatus, 1000);
 
-        window.initAudio = () => { let v = document.getElementById('videoBg'); if(v) { v.muted = false; v.play().catch(()=>{}); } };
-        window.changeName = () => { let n = prompt("Hero Name?"); if(n) { db.name = n.toUpperCase(); window.save(); } };
+        window.initAudio = () => { 
+            let v = document.getElementById('videoBg'); 
+            if(v) { v.muted = false; v.play().catch(()=>{}); } 
+        };
+
+        window.changeName = () => { 
+            let n = prompt("Ganti nama hero?"); 
+            if(n) { db.name = n.toUpperCase(); window.save(); } 
+        };
+
+        // INITIALIZE
         window.save();
     </script>
 </body>
-            </html>
+    </html>
