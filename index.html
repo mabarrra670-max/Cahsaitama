@@ -156,24 +156,37 @@
         };
 
         window.pull = () => {
-            if(db.dia < 100) return tg.showAlert("Diamond Kurang!");
-            db.dia -= 100;
-            let r = Math.random()*100, cur=0, rolled;
-            for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
-            if(!rolled) rolled = heroPool[heroPool.length-1];
-            let o = db.inv.find(x => x.id === rolled.id);
-            if(o) o.lvl = (o.lvl || 1) + 1; else db.inv.push({...rolled, lvl:1});
-            const view = document.getElementById('single-view');
-            view.classList.remove('gacha-anim');
-            setTimeout(() => {
-                view.style.backgroundImage = `url('${rolled.img}')`;
-                view.classList.add('gacha-anim');
-                document.getElementById('gacha-rarity').innerText = rolled.rar;
-                document.getElementById('gacha-rarity').className = `rarity ${rolled.rar}`;
-                window.save();
-            }, 50);
-        };
+    if(db.dia < 100) return tg.showAlert("Diamond Kurang!");
+    db.dia -= 100;
 
+    const totalRate = heroPool.reduce((a,b)=>a+b.rate,0);
+    let r = Math.random() * totalRate;
+    let cur = 0;
+    let rolled = heroPool[heroPool.length-1];
+
+    for(let h of heroPool){
+        cur += h.rate;
+        if(r <= cur){
+            rolled = h;
+            break;
+        }
+    }
+
+    let o = db.inv.find(x => x.id === rolled.id);
+    if(o) o.lvl = (o.lvl || 1) + 1;
+    else db.inv.push({...rolled, lvl:1});
+
+    const view = document.getElementById('single-view');
+    view.classList.remove('gacha-anim');
+
+    setTimeout(() => {
+        view.style.backgroundImage = `url('${rolled.img}')`;
+        view.classList.add('gacha-anim');
+        document.getElementById('gacha-rarity').innerText = rolled.rar;
+        document.getElementById('gacha-rarity').className = `rarity ${rolled.rar}`;
+        window.save();
+    }, 50);
+};
         function updateInventory() {
             document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
                 <div class="card-item" style="background-image:url('${h.img}')" onclick="window.selectHero(${h.id})">
