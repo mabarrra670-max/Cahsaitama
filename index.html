@@ -203,9 +203,12 @@
 
         window.startMatchmaking = () => {
             if(!db.selected) return tg.showAlert("Pilih Hero di Profile!");
-            socket.emit("find_match", { name: db.name, img: db.selected.img, pwr: db.selected.pwr * (db.selected.lvl || 1) });
-            document.getElementById('btn-match').innerText = "MENCARI...";
-        };
+            socket.emit("find_match", {
+    name: db.name,
+    heroId: db.selected.id,
+    lvl: db.selected.lvl || 1,
+    img: db.selected.img
+});
 
         socket.on("match_found", (data) => {
             document.getElementById('vs-overlay').style.display = 'flex';
