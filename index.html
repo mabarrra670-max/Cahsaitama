@@ -132,12 +132,32 @@
         import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
         const socket = io("https://cahsaitama.onrender.com");
         const tg = window.Telegram.WebApp;
+const heroPool = [
+    // LEGENDARY (LR) - Rate: 1%
+    { id: 1, name: "Saitama God", rar: "LR", pwr: 999999, rate: 0.5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/saitamagod.png" },
+    { id: 2, name: "God", rar: "LR", pwr: 850000, rate: 0.5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/god.png" },
 
-        const heroPool = [
-            { id:1, name:"Saitama God", rar:"LR", pwr:999999, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitamagod.png", rate:1 },
-            { id:2, name:"Cosmic Garou", rar:"LR", pwr:65000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/cosmicgarou.png", rate:5 },
-            { id:3, name:"Saitama", rar:"SSR", pwr:50000, img:"https://raw.githubusercontent.com/mabarrra670-max/Gacha/2b743c1c0667b9d0c68148690f832ad239da9d59/card/saitama.png", rate:10 }
-        ];
+    // SUPER SPECIAL RARE (SSR) - Rate: 9%
+    { id: 3, name: "Cosmic Garou", rar: "SSR", pwr: 95000, rate: 2, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/cosmicgarou.png" },
+    { id: 4, name: "Blast", rar: "SSR", pwr: 90000, rate: 2, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/blast.png" },
+    { id: 5, name: "Tatsumaki", rar: "SSR", pwr: 85000, rate: 2, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/tatsumaki.png" },
+    { id: 6, name: "Saitama", rar: "SSR", pwr: 80000, rate: 3, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/saitama.png" },
+
+    // SUPER RARE (SR) - Rate: 30%
+    { id: 7, name: "Garou Monster", rar: "SR", pwr: 45000, rate: 5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/garoumonster.png" },
+    { id: 8, name: "Bang", rar: "SR", pwr: 42000, rate: 5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/bang.png" },
+    { id: 9, name: "Genos", rar: "SR", pwr: 38000, rate: 5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/genos.png" },
+    { id: 10, name: "Atomic Samurai", rar: "SR", pwr: 35000, rate: 5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/atomicsamurai.png" },
+    { id: 11, name: "Flashy Flash", rar: "SR", pwr: 33000, rate: 5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/flashyflash.png" },
+    { id: 12, name: "Fubuki", rar: "SR", pwr: 30000, rate: 5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/fubuki.png" },
+
+    // RARE (R) - Rate: 60%
+    { id: 13, name: "Amai Mask", rar: "R", pwr: 15000, rate: 12, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/amaimask.png" },
+    { id: 14, name: "Child Emperor", rar: "R", pwr: 12000, rate: 12, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/childemperor.png" },
+    { id: 15, name: "Puri Puri Prisoner", rar: "R", pwr: 10000, rate: 12, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/puripuri.png" },
+    { id: 16, name: "Mumen Rider", rar: "R", pwr: 5000, rate: 12, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/mumenrider.png" },
+    { id: 17, name: "King", rar: "R", pwr: 1, rate: 12, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/king.png" }
+];
 
         let db = JSON.parse(localStorage.getItem('OPG_DATA')) || { name:"PLAYER", dia:500, coin:0, inv:[], selected:null };
         if (db.coin === undefined) db.coin = 0; 
