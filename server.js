@@ -14,13 +14,19 @@ io.on("connection", (socket) => {
   // 1. UPDATE STATUS & DATA PLAYER
   // Fungsi ini menangani data leaderboard, koin, dan hero aktif secara real-time
   socket.on("update_my_status", (userData) => {
+    // Validasi sederhana agar Power tidak dimanipulasi secara ilegal (max 2 juta)
+    const securePwr = (userData.pwr > 2000000) ? 1 : (userData.pwr || 0);
+
     onlineUsers[socket.id] = {
         name: userData.name || "PLAYER",
         hero: userData.hero || "None",
-        pwr: userData.pwr || 0,
+        pwr: securePwr,
         coins: userData.coins || 0,
         socketId: socket.id
     };
+    
+    io.emit("update_online_count", Object.keys(onlineUsers).length);
+  });
     
     // Broadcast jumlah player online ke semua user
     io.emit("update_online_count", Object.keys(onlineUsers).length);
