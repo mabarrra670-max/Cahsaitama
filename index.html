@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>One Punch Gacha: All-in-One</title>
+    <title>One Punch Gacha: Power Upgrade</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -28,7 +28,34 @@
         .rarity { position: absolute; top: 5px; right: 5px; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; font-family: 'Bebas Neue'; z-index: 5; }
         .LR { background: linear-gradient(45deg, #ff0000, #ffd700); box-shadow: 0 0 10px #f00; }
         .SSR { background: var(--gold); color: #000; }
-        .card-item { position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; border: 1px solid #444; }
+        .SR { background: var(--purple); color: #fff; }
+        .R { background: var(--blue); color: #fff; }
+        
+        .card-item { position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; border: 1px solid #444; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        
+        /* New Styles for Card Stats */
+        .card-info-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent);
+            padding: 25px 5px 5px 5px; /* Top padding for gradient fade */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card-pwr { font-family: 'Bebas Neue'; font-size: 1.1rem; color: var(--gold); text-shadow: 0 2px 2px #000; line-height: 1; }
+        .card-lvl { font-size: 0.65rem; color: #ccc; margin-top: 2px; font-weight: 600; }
+        .upgrade-badge {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
+            border: 2px solid #fff; background: var(--green); color: #fff;
+            padding: 5px 10px; font-family: 'Bebas Neue'; font-size: 1.5rem;
+            animation: gachaPop 0.5s ease-out; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: none; z-index: 10;
+        }
+
         .hp-container { width: 90%; height: 6px; background: #333; border-radius: 10px; margin: 5px auto; overflow: hidden; position: absolute; bottom: 5px; left: 5%; }
         .hp-bar { height: 100%; width: 100%; transition: width 0.4s ease; background: var(--green); }
         .fighter-box { height: 130px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; position: relative; overflow: hidden; }
@@ -39,7 +66,7 @@
         .nav-item.active { color: var(--gold); }
         .nav-item span { font-size: 1.4rem; margin-bottom: 2px; }
         #vs-overlay, #result-screen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
-        @keyframes gachaPop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes gachaPop { 0% { transform: scale(0) rotate(0deg); } 80% { transform: scale(1.2) rotate(-15deg); } 100% { transform: scale(1) rotate(-15deg); } }
         .gacha-anim { animation: gachaPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(2px,2px); } 50% { transform: translate(-2px,-2px); } }
         .shake { animation: shake 0.2s infinite; }
@@ -62,8 +89,16 @@
         <h2 style="font-family:'Bebas Neue'; color:var(--gold);">SUMMON</h2>
         <div id="single-view" style="width:180px; height:260px; margin:20px 0; border:2px solid #444; border-radius:15px; background-size:cover; background-position:center; position:relative;">
             <div id="gacha-rarity" class="rarity"></div>
+            <div id="lvl-up-badge" class="upgrade-badge">LEVEL UP!</div>
+            <div id="gacha-stats" class="card-info-overlay" style="display:none;">
+                <div id="gacha-pwr-txt" class="card-pwr"></div>
+                <div id="gacha-lvl-txt" class="card-lvl"></div>
+            </div>
         </div>
         <button class="btn" onclick="window.pull()">PULL (100 💎)</button>
+        <div style="font-size: 0.7rem; color: #888; text-align: center; margin-top: 5px;">
+            Dapatkan Duplicate untuk <b style="color:var(--green)">UPGRADE POWER!</b>
+        </div>
     </div>
 
     <div id="pvp" class="screen">
@@ -79,8 +114,20 @@
     </div>
 
     <div id="rank" class="screen"><h2 style="font-family:'Bebas Neue'; color:var(--gold);">RANKING</h2><div id="leaderboard-list" style="width:100%;"></div></div>
-    <div id="market" class="screen"><h2 style="font-family:'Bebas Neue'; color:var(--gold);">MARKET</h2><p style="font-size:0.7rem; color:#888;">Jual Kartu = 10 🟡</p><div id="market-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; width:100%;"></div></div>
-    <div id="shop" class="screen"><h2 style="font-family:'Bebas Neue'; color:var(--gold);">SHOP</h2><div class="shop-card"><div><b>100 DIAMONDS</b><br><small>Harga: 50 🟡</small></div><button class="btn" style="width:auto; padding:5px 15px; margin:0;" onclick="window.buyDia(100, 50)">BELI</button></div></div>
+    
+    <div id="market" class="screen">
+        <h2 style="font-family:'Bebas Neue'; color:var(--gold);">MARKET</h2>
+        <p style="font-size:0.7rem; color:#888;">Jual Kartu = 10 🟡</p>
+        <div id="market-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; width:100%;"></div>
+    </div>
+    
+    <div id="shop" class="screen">
+        <h2 style="font-family:'Bebas Neue'; color:var(--gold);">SHOP</h2>
+        <div class="shop-card">
+            <div><b>100 DIAMONDS</b><br><small>Harga: 50 🟡</small></div>
+            <button class="btn" style="width:auto; padding:5px 15px; margin:0;" onclick="window.buyDia(100, 50)">BELI</button>
+        </div>
+    </div>
     
     <div id="profil" class="screen">
         <h2 style="font-family:'Bebas Neue'; color:var(--gold);">PROFILE</h2>
@@ -114,7 +161,6 @@
         const vbg = document.getElementById('videoBg');
         const triggerVideo = () => {
             vbg.play().catch(e => console.log("Menunggu interaksi..."));
-            // Hapus listener setelah video berhasil diputar sekali
             window.removeEventListener('touchstart', triggerVideo);
             window.removeEventListener('mousedown', triggerVideo);
         };
@@ -179,34 +225,82 @@
         window.pull = () => {
             if(db.dia < 100) return tg.showAlert("Diamond Kurang!");
             db.dia -= 100;
+            
+            // Randomizer Logic
             let r = Math.random()*100, cur=0, rolled;
             for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
             if(!rolled) rolled = heroPool[heroPool.length-1];
+
+            // Duplicate / Upgrade Logic
             let o = db.inv.find(x => x.id === rolled.id);
-            if(o) o.lvl = (o.lvl || 1) + 1; else db.inv.push({...rolled, lvl:1});
+            let isLevelUp = false;
+            let currentLvl = 1;
+
+            if(o) {
+                // Jika sudah punya, upgrade level
+                o.lvl = (o.lvl || 1) + 1;
+                isLevelUp = true;
+                currentLvl = o.lvl;
+            } else {
+                // Jika baru, tambahkan ke inventory
+                db.inv.push({...rolled, lvl:1});
+            }
+
+            // Animasi dan Display
             const view = document.getElementById('single-view');
+            const badge = document.getElementById('lvl-up-badge');
+            const stats = document.getElementById('gacha-stats');
+            const pwrTxt = document.getElementById('gacha-pwr-txt');
+            const lvlTxt = document.getElementById('gacha-lvl-txt');
+
             view.classList.remove('gacha-anim');
+            badge.style.display = 'none';
+            stats.style.display = 'none';
+
             setTimeout(() => {
                 view.style.backgroundImage = `url('${rolled.img}')`;
                 view.classList.add('gacha-anim');
                 document.getElementById('gacha-rarity').innerText = rolled.rar;
                 document.getElementById('gacha-rarity').className = `rarity ${rolled.rar}`;
+                
+                // Menampilkan Badge jika Level Up
+                if (isLevelUp) {
+                    badge.style.display = 'block';
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
+
+                // Menampilkan Statistik Power Update
+                stats.style.display = 'flex';
+                let totalPwr = rolled.pwr * currentLvl;
+                pwrTxt.innerText = `⚡ ${totalPwr.toLocaleString()}`;
+                lvlTxt.innerText = `⭐ LEVEL ${currentLvl}`;
+
                 window.save();
             }, 50);
         };
 
         function updateInventory() {
-            document.getElementById('inv-grid').innerHTML = db.inv.map(h => `
+            document.getElementById('inv-grid').innerHTML = db.inv.map(h => {
+                let lvl = h.lvl || 1;
+                let totalPwr = h.pwr * lvl;
+                return `
                 <div class="card-item" style="background-image:url('${h.img}')" onclick="window.selectHero(${h.id})">
                     <div class="rarity ${h.rar}">${h.rar}</div>
-                    <div style="position:absolute; bottom:0; width:100%; background:rgba(0,0,0,0.7); font-size:0.6rem; text-align:center;">LVL ${h.lvl || 1}</div>
-                </div>`).join('');
+                    <div class="card-info-overlay">
+                        <div class="card-pwr">⚡ ${totalPwr.toLocaleString()}</div>
+                        <div class="card-lvl">⭐ LEVEL ${lvl}</div>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         window.selectHero = (id) => {
             db.selected = db.inv.find(x => x.id === id);
             document.getElementById('p-fighter').style.backgroundImage = `url('${db.selected.img}')`;
-            tg.showConfirm("Gunakan " + db.selected.name + "?", (ok) => { if(ok) window.save(); });
+            let totalPwr = db.selected.pwr * (db.selected.lvl || 1);
+            tg.showConfirm(`Gunakan ${db.selected.name} (Pwr: ${totalPwr.toLocaleString()})?`, (ok) => { if(ok) window.save(); });
         };
 
         window.startMatchmaking = () => {
@@ -266,10 +360,17 @@
         }
 
         function updateMarket() {
-            document.getElementById('market-grid').innerHTML = db.inv.map(h => `
+            document.getElementById('market-grid').innerHTML = db.inv.map(h => {
+                let lvl = h.lvl || 1;
+                let totalPwr = h.pwr * lvl;
+                return `
                 <div class="card-item" style="background-image:url('${h.img}')">
-                    <button onclick="window.sellHero(${h.id})" style="position:absolute; bottom:0; width:100%; background:red; color:white; border:none; font-size:0.6rem; padding:5px;">JUAL (10🟡)</button>
-                </div>`).join('');
+                    <div class="card-info-overlay" style="padding-bottom:25px;">
+                        <div class="card-pwr" style="font-size:0.9rem">⚡ ${totalPwr.toLocaleString()}</div>
+                    </div>
+                    <button onclick="window.sellHero(${h.id})" style="position:absolute; bottom:0; width:100%; background:red; color:white; border:none; font-size:0.6rem; padding:5px; z-index:10;">JUAL (10🟡)</button>
+                </div>`;
+            }).join('');
         }
 
         window.sellHero = (id) => {
