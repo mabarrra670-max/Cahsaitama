@@ -10,13 +10,11 @@
         :root { --gold: #ffd700; --red: #ff4757; --dark: #0a0a0a; --green: #2ecc71; --purple: #a020f0; --blue: #3498db; --orange: #e67e22; }
         body { margin: 0; background: var(--dark); color: #fff; font-family: 'Poppins', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Video Background Styling */
         #videoBg { 
             position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; 
             z-index: -2; filter: brightness(0.25); pointer-events: none; 
         }
 
-        /* --- LOADING SCREEN STYLES --- */
         #loading-screen {
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -40,7 +38,6 @@
         }
         @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
         .fade-out { opacity: 0; pointer-events: none; }
-        /* --- END LOADING SCREEN STYLES --- */
 
         .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; z-index: 5; opacity: 0; transition: 0.3s; }
         .screen.active { display: flex; opacity: 1; }
@@ -138,7 +135,6 @@
     
     <div id="market" class="screen">
         <h2 style="font-family:'Bebas Neue'; color:var(--gold);">MARKET</h2>
-        <p style="font-size:0.7rem; color:#888;">Jual Kartu = Power / 1000 + 10 🟡</p>
         <div id="market-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; width:100%;"></div>
     </div>
     
@@ -178,7 +174,6 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- LOADING SCREEN LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             const loadingScreen = document.getElementById('loading-screen');
             const barFill = document.getElementById('loading-bar-fill');
@@ -199,7 +194,6 @@
             }, 200);
         });
 
-        // POOL HERO & DATABASE
         const heroPool = [
             { id: 1, name: "Saitama God", rar: "LR", pwr: 999999, rate: 0.5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/saitamagod.png" },
             { id: 2, name: "God", rar: "LR", pwr: 850000, rate: 0.5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/god.png" },
@@ -366,11 +360,33 @@
             }, 600);
         }
 
+        // --- UPDATED SHOWRES FUNCTION ---
         function showRes(win) {
-            document.getElementById('result-screen').style.display = 'flex';
-            document.getElementById('res-title').innerText = win ? "VICTORY" : "DEFEAT";
-            document.getElementById('res-title').style.color = win ? "var(--gold)" : "var(--red)";
-            if(win) tg.HapticFeedback.notificationOccurred('success');
+            let reward = win ? 100 : 10; 
+            db.dia += reward; 
+            
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.style.display = 'flex';
+            
+            const resTitle = document.getElementById('res-title');
+            resTitle.innerText = win ? "VICTORY" : "DEFEAT";
+            resTitle.style.color = win ? "var(--gold)" : "var(--red)";
+            
+            const oldReward = document.getElementById('reward-display');
+            if (oldReward) oldReward.remove();
+
+            const rewardText = win ? `+${reward} 💎 (Victory Bonus)` : `+${reward} 💎 (Consolation Prize)`;
+            resTitle.insertAdjacentHTML('afterend', 
+                `<p id="reward-display" style="color:var(--gold); font-family:'Bebas Neue'; font-size:1.5rem; margin-top:10px;">${rewardText}</p>`
+            );
+
+            if(win) {
+                tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                tg.HapticFeedback.notificationOccurred('error');
+            }
+
+            window.save(); 
         }
 
         function getSellPrice(card) {
@@ -422,4 +438,4 @@
         window.save();
     </script>
 </body>
-                                                                                                           </html>
+                                                                                          </html>
