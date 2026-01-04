@@ -117,7 +117,7 @@
     
     <div id="market" class="screen">
         <h2 style="font-family:'Bebas Neue'; color:var(--gold);">MARKET</h2>
-        <p style="font-size:0.7rem; color:#888;">Jual Kartu = 10 🟡</p>
+        <p style="font-size:0.7rem; color:#888;">Jual Kartu = Power / 1000 + 10 🟡</p>
         <div id="market-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; width:100%;"></div>
     </div>
     
@@ -359,29 +359,67 @@
             if(win) tg.HapticFeedback.notificationOccurred('success');
         }
 
+        // ====================================================
+        // UPDATE MARKET LOGIC START
+        // ====================================================
+
+        // Fungsi helper untuk menghitung harga jual
+        function getSellPrice(card) {
+            const totalPwr = card.pwr * (card.lvl || 1);
+            // Rumus: (Power / 1000) dibulatkan ke bawah + 10 Coin minimal
+            return Math.floor(totalPwr / 1000) + 10;
+        }
+
         function updateMarket() {
             document.getElementById('market-grid').innerHTML = db.inv.map(h => {
                 let lvl = h.lvl || 1;
                 let totalPwr = h.pwr * lvl;
+                // Hitung harga menggunakan fungsi baru
+                let price = getSellPrice(h); 
+                
                 return `
                 <div class="card-item" style="background-image:url('${h.img}')">
                     <div class="card-info-overlay" style="padding-bottom:25px;">
                         <div class="card-pwr" style="font-size:0.9rem">⚡ ${totalPwr.toLocaleString()}</div>
+                        <div class="card-lvl" style="font-size:0.6rem">LVL ${lvl}</div>
                     </div>
-                    <button onclick="window.sellHero(${h.id})" style="position:absolute; bottom:0; width:100%; background:red; color:white; border:none; font-size:0.6rem; padding:5px; z-index:10;">JUAL (10🟡)</button>
+                    <button onclick="window.sellHero(${h.id})" style="position:absolute; bottom:0; width:100%; background:var(--red); color:white; border:none; font-size:0.6rem; padding:5px; z-index:10; font-family:'Poppins'; font-weight:bold;">
+                        JUAL (${price.toLocaleString()} 🟡)
+                    </button>
                 </div>`;
             }).join('');
         }
 
         window.sellHero = (id) => {
             const idx = db.inv.findIndex(x => x.id === id);
+            
             if(idx > -1) {
-                if(db.selected && db.selected.id === id) db.selected = null;
+                // Ambil data kartu sebelum dihapus untuk hitung harga
+                const card = db.inv[idx];
+                const price = getSellPrice(card);
+
+                if(db.selected && db.selected.id === id) {
+                    db.selected = null;
+                    document.getElementById('prof-hero-val').innerText = "None";
+                }
+
                 db.inv.splice(idx, 1);
-                db.coin += 10;
-                window.save(); updateMarket();
+                
+                // Tambahkan koin dinamis
+                db.coin += price;
+                
+                tg.HapticFeedback.notificationOccurred('success');
+                window.save(); 
+                updateMarket();
+                
+                // Update tampilan koin header segera
+                document.getElementById('p-coin').innerText = db.coin;
             }
         };
+
+        // ====================================================
+        // UPDATE MARKET LOGIC END
+        // ====================================================
 
         window.buyDia = (a, p) => {
             if(db.coin < p) return tg.showAlert("Koin tidak cukup!");
