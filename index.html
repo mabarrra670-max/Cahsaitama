@@ -12,15 +12,35 @@
         
         /* Video Background Styling */
         #videoBg { 
-            position: fixed; 
-            inset: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            z-index: -2; 
-            filter: brightness(0.25); 
-            pointer-events: none; 
+            position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; 
+            z-index: -2; filter: brightness(0.25); pointer-events: none; 
         }
+
+        /* --- LOADING SCREEN STYLES --- */
+        #loading-screen {
+            position: fixed; inset: 0; background: #000; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 99999; transition: opacity 1s ease;
+        }
+        .loader-wrapper { position: relative; width: 200px; height: 200px; display: flex; justify-content: center; align-items: center; }
+        .loader-circle {
+            position: absolute; width: 100%; height: 100%; border: 4px solid transparent;
+            border-top: 4px solid var(--gold); border-right: 4px solid var(--red);
+            border-radius: 50%; animation: spin 1.5s linear infinite;
+        }
+        .loader-img-main {
+            width: 160px; height: 160px; border-radius: 50%; object-fit: cover;
+            z-index: 10; box-shadow: 0 0 30px rgba(255, 215, 0, 0.3); border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-text {
+            margin-top: 30px; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem;
+            color: var(--gold); letter-spacing: 4px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: blink 1s infinite alternate;
+        }
+        @keyframes blink { from { opacity: 0.5; } to { opacity: 1; } }
+        .fade-out { opacity: 0; pointer-events: none; }
+        /* --- END LOADING SCREEN STYLES --- */
 
         .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; z-index: 5; opacity: 0; transition: 0.3s; }
         .screen.active { display: flex; opacity: 1; }
@@ -32,19 +52,10 @@
         .R { background: var(--blue); color: #fff; }
         
         .card-item { position: relative; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; background-color: #222; background-size: cover; background-position: center; border: 1px solid #444; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-        
-        /* New Styles for Card Stats */
         .card-info-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            position: absolute; bottom: 0; left: 0; width: 100%;
             background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6), transparent);
-            padding: 25px 5px 5px 5px; /* Top padding for gradient fade */
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 25px 5px 5px 5px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;
         }
         .card-pwr { font-family: 'Bebas Neue'; font-size: 1.1rem; color: var(--gold); text-shadow: 0 2px 2px #000; line-height: 1; }
         .card-lvl { font-size: 0.65rem; color: #ccc; margin-top: 2px; font-weight: 600; }
@@ -55,7 +66,6 @@
             animation: gachaPop 0.5s ease-out; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             display: none; z-index: 10;
         }
-
         .hp-container { width: 90%; height: 6px; background: #333; border-radius: 10px; margin: 5px auto; overflow: hidden; position: absolute; bottom: 5px; left: 5%; }
         .hp-bar { height: 100%; width: 100%; transition: width 0.4s ease; background: var(--green); }
         .fighter-box { height: 130px; border: 2px solid #444; border-radius: 15px; background-size: cover; background-position: center; position: relative; overflow: hidden; }
@@ -73,6 +83,17 @@
     </style>
 </head>
 <body>
+    <div id="loading-screen">
+        <div class="loader-wrapper">
+            <div class="loader-circle"></div>
+            <img src="https://raw.githubusercontent.com/mabarrra670-max/Gacha/f7666f93ef348d395fe267e994767784f76531a2/card/loadingscreen.png" class="loader-img-main">
+        </div>
+        <div class="loader-text">PREPARING POWER...</div>
+        <div style="width: 200px; height: 3px; background: #222; margin-top: 15px; border-radius: 10px; overflow: hidden;">
+            <div id="loading-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); transition: width 0.3s;"></div>
+        </div>
+    </div>
+
     <video id="videoBg" playsinline loop muted autoplay>
         <source src="https://raw.githubusercontent.com/mabarrra670-max/Sik/2618c2c289f712966754adcf30adcf30af376696ccc73f/lv_0_20260101162558.mp4" type="video/mp4">
     </video>
@@ -157,16 +178,28 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // LOGIKA VIDEO BACKGROUND
-        const vbg = document.getElementById('videoBg');
-        const triggerVideo = () => {
-            vbg.play().catch(e => console.log("Menunggu interaksi..."));
-            window.removeEventListener('touchstart', triggerVideo);
-            window.removeEventListener('mousedown', triggerVideo);
-        };
-        window.addEventListener('touchstart', triggerVideo);
-        window.addEventListener('mousedown', triggerVideo);
+        // --- LOADING SCREEN LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const barFill = document.getElementById('loading-bar-fill');
+            let progress = 0;
+            const loadInterval = setInterval(() => {
+                progress += Math.random() * 20; 
+                if (progress > 100) progress = 100;
+                barFill.style.width = progress + "%";
+                if (progress >= 100) {
+                    clearInterval(loadInterval);
+                    setTimeout(() => {
+                        loadingScreen.classList.add('fade-out');
+                        setTimeout(() => { loadingScreen.remove(); }, 1000);
+                        const vbg = document.getElementById('videoBg');
+                        if (vbg) vbg.play().catch(e => console.log("Auto-play blocked"));
+                    }, 800);
+                }
+            }, 200);
+        });
 
+        // POOL HERO & DATABASE
         const heroPool = [
             { id: 1, name: "Saitama God", rar: "LR", pwr: 999999, rate: 0.5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/saitamagod.png" },
             { id: 2, name: "God", rar: "LR", pwr: 850000, rate: 0.5, img: "https://raw.githubusercontent.com/mabarrra670-max/Gacha/0accb245d41298fdcf5a0481fc990c4b352ae326/card/god.png" },
@@ -225,28 +258,22 @@
         window.pull = () => {
             if(db.dia < 100) return tg.showAlert("Diamond Kurang!");
             db.dia -= 100;
-            
-            // Randomizer Logic
             let r = Math.random()*100, cur=0, rolled;
             for(let h of heroPool){ cur+=h.rate; if(r<=cur){rolled=h; break;} }
             if(!rolled) rolled = heroPool[heroPool.length-1];
 
-            // Duplicate / Upgrade Logic
             let o = db.inv.find(x => x.id === rolled.id);
             let isLevelUp = false;
             let currentLvl = 1;
 
             if(o) {
-                // Jika sudah punya, upgrade level
                 o.lvl = (o.lvl || 1) + 1;
                 isLevelUp = true;
                 currentLvl = o.lvl;
             } else {
-                // Jika baru, tambahkan ke inventory
                 db.inv.push({...rolled, lvl:1});
             }
 
-            // Animasi dan Display
             const view = document.getElementById('single-view');
             const badge = document.getElementById('lvl-up-badge');
             const stats = document.getElementById('gacha-stats');
@@ -262,21 +289,16 @@
                 view.classList.add('gacha-anim');
                 document.getElementById('gacha-rarity').innerText = rolled.rar;
                 document.getElementById('gacha-rarity').className = `rarity ${rolled.rar}`;
-                
-                // Menampilkan Badge jika Level Up
                 if (isLevelUp) {
                     badge.style.display = 'block';
                     tg.HapticFeedback.notificationOccurred('success');
                 } else {
                     tg.HapticFeedback.impactOccurred('medium');
                 }
-
-                // Menampilkan Statistik Power Update
                 stats.style.display = 'flex';
                 let totalPwr = rolled.pwr * currentLvl;
                 pwrTxt.innerText = `⚡ ${totalPwr.toLocaleString()}`;
                 lvlTxt.innerText = `⭐ LEVEL ${currentLvl}`;
-
                 window.save();
             }, 50);
         };
@@ -324,18 +346,15 @@
             document.getElementById('e-fighter').style.backgroundImage = `url('${opp.img}')`;
             document.getElementById('p-fighter').innerHTML = '<div class="hp-container"><div id="hp1" class="hp-bar"></div></div>';
             document.getElementById('e-fighter').innerHTML = '<div class="hp-container"><div id="hp2" class="hp-bar" style="background:red"></div></div>';
-            
             let s = 0;
             const myBase = db.selected.pwr * (db.selected.lvl || 1);
             const myPwr = myBase * (0.9 + Math.random() * 0.2); 
             const oppPwr = opp.pwr * (0.9 + Math.random() * 0.2);
-
             let i = setInterval(() => {
                 s++; 
                 document.getElementById('arena-box').classList.add('shake');
                 tg.HapticFeedback.impactOccurred('heavy');
                 setTimeout(() => document.getElementById('arena-box').classList.remove('shake'), 100);
-                
                 if(myPwr > oppPwr) {
                     document.getElementById('hp2').style.width = (100 - (s*20))+"%";
                     document.getElementById('hp1').style.width = "100%";
@@ -343,12 +362,7 @@
                     document.getElementById('hp1').style.width = (100 - (s*20))+"%";
                     document.getElementById('hp2').style.width = "100%";
                 }
-                
-                if(s>=5){ 
-                    clearInterval(i); 
-                    showRes(myPwr > oppPwr); 
-                    document.getElementById('btn-match').innerText = "CARI LAWAN";
-                }
+                if(s>=5){ clearInterval(i); showRes(myPwr > oppPwr); document.getElementById('btn-match').innerText = "CARI LAWAN"; }
             }, 600);
         }
 
@@ -359,29 +373,18 @@
             if(win) tg.HapticFeedback.notificationOccurred('success');
         }
 
-        // ====================================================
-        // UPDATE MARKET LOGIC START
-        // ====================================================
-
-        // Fungsi helper untuk menghitung harga jual
         function getSellPrice(card) {
-            const totalPwr = card.pwr * (card.lvl || 1);
-            // Rumus: (Power / 1000) dibulatkan ke bawah + 10 Coin minimal
-            return Math.floor(totalPwr / 1000) + 10;
+            return Math.floor((card.pwr * (card.lvl || 1)) / 1000) + 10;
         }
 
         function updateMarket() {
             document.getElementById('market-grid').innerHTML = db.inv.map(h => {
-                let lvl = h.lvl || 1;
-                let totalPwr = h.pwr * lvl;
-                // Hitung harga menggunakan fungsi baru
                 let price = getSellPrice(h); 
-                
                 return `
                 <div class="card-item" style="background-image:url('${h.img}')">
                     <div class="card-info-overlay" style="padding-bottom:25px;">
-                        <div class="card-pwr" style="font-size:0.9rem">⚡ ${totalPwr.toLocaleString()}</div>
-                        <div class="card-lvl" style="font-size:0.6rem">LVL ${lvl}</div>
+                        <div class="card-pwr" style="font-size:0.9rem">⚡ ${(h.pwr * (h.lvl || 1)).toLocaleString()}</div>
+                        <div class="card-lvl" style="font-size:0.6rem">LVL ${h.lvl || 1}</div>
                     </div>
                     <button onclick="window.sellHero(${h.id})" style="position:absolute; bottom:0; width:100%; background:var(--red); color:white; border:none; font-size:0.6rem; padding:5px; z-index:10; font-family:'Poppins'; font-weight:bold;">
                         JUAL (${price.toLocaleString()} 🟡)
@@ -392,34 +395,16 @@
 
         window.sellHero = (id) => {
             const idx = db.inv.findIndex(x => x.id === id);
-            
             if(idx > -1) {
-                // Ambil data kartu sebelum dihapus untuk hitung harga
-                const card = db.inv[idx];
-                const price = getSellPrice(card);
-
-                if(db.selected && db.selected.id === id) {
-                    db.selected = null;
-                    document.getElementById('prof-hero-val').innerText = "None";
-                }
-
+                const price = getSellPrice(db.inv[idx]);
+                if(db.selected && db.selected.id === id) db.selected = null;
                 db.inv.splice(idx, 1);
-                
-                // Tambahkan koin dinamis
                 db.coin += price;
-                
                 tg.HapticFeedback.notificationOccurred('success');
                 window.save(); 
                 updateMarket();
-                
-                // Update tampilan koin header segera
-                document.getElementById('p-coin').innerText = db.coin;
             }
         };
-
-        // ====================================================
-        // UPDATE MARKET LOGIC END
-        // ====================================================
 
         window.buyDia = (a, p) => {
             if(db.coin < p) return tg.showAlert("Koin tidak cukup!");
@@ -437,4 +422,4 @@
         window.save();
     </script>
 </body>
-    </html>
+                                                                                                           </html>
