@@ -233,9 +233,15 @@
             document.getElementById('p-name').innerText = db.name;
             document.getElementById('prof-name-val').innerText = db.name;
             document.getElementById('prof-hero-val').innerText = db.selected ? db.selected.name : "None";
+            
+            // Kirim data hero + level ke server untuk leaderboard
             socket.emit("update_my_status", { 
-                name: db.name, hero: db.selected ? db.selected.name : "None", 
-                pwr: db.selected ? db.selected.pwr * (db.selected.lvl || 1) : 0, coins: db.coin 
+                name: db.name, 
+                hero: db.selected ? db.selected.name : "None", 
+                heroImg: db.selected ? db.selected.img : "",
+                heroLvl: db.selected ? (db.selected.lvl || 1) : 0,
+                pwr: db.selected ? db.selected.pwr * (db.selected.lvl || 1) : 0, 
+                coins: db.coin 
             });
         };
 
@@ -360,32 +366,20 @@
             }, 600);
         }
 
-        // --- UPDATED SHOWRES FUNCTION ---
         function showRes(win) {
             let reward = win ? 100 : 10; 
             db.dia += reward; 
-            
             const resultScreen = document.getElementById('result-screen');
             resultScreen.style.display = 'flex';
-            
             const resTitle = document.getElementById('res-title');
             resTitle.innerText = win ? "VICTORY" : "DEFEAT";
             resTitle.style.color = win ? "var(--gold)" : "var(--red)";
-            
             const oldReward = document.getElementById('reward-display');
             if (oldReward) oldReward.remove();
-
             const rewardText = win ? `+${reward} 💎 (Victory Bonus)` : `+${reward} 💎 (Consolation Prize)`;
-            resTitle.insertAdjacentHTML('afterend', 
-                `<p id="reward-display" style="color:var(--gold); font-family:'Bebas Neue'; font-size:1.5rem; margin-top:10px;">${rewardText}</p>`
-            );
-
-            if(win) {
-                tg.HapticFeedback.notificationOccurred('success');
-            } else {
-                tg.HapticFeedback.notificationOccurred('error');
-            }
-
+            resTitle.insertAdjacentHTML('afterend', `<p id="reward-display" style="color:var(--gold); font-family:'Bebas Neue'; font-size:1.5rem; margin-top:10px;">${rewardText}</p>`);
+            if(win) tg.HapticFeedback.notificationOccurred('success');
+            else tg.HapticFeedback.notificationOccurred('error');
             window.save(); 
         }
 
@@ -427,15 +421,32 @@
             db.coin -= p; db.dia += a; window.save(); tg.showAlert("Berhasil beli!");
         };
 
+        // LEADERBOARD UPDATED: Menampilkan Kartu, Level, dan Power
         socket.on("leaderboard_data", (data) => {
-            document.getElementById('leaderboard-list').innerHTML = data.map((p, i) => `
-                <div class="rank-item">
-                    <span>#${i+1} ${p.name}</span>
-                    <span style="color:var(--gold)">${p.pwr.toLocaleString()} PWR</span>
-                </div>`).join('');
+            document.getElementById('leaderboard-list').innerHTML = data.map((p, i) => {
+                let borderColor = i === 0 ? 'var(--gold)' : (i === 1 ? '#C0C0C0' : (i === 2 ? '#cd7f32' : '#333'));
+                return `
+                <div class="rank-item" style="border-left: 4px solid ${borderColor}; background: rgba(255,255,255,0.08); margin-bottom: 12px; padding: 10px; display: flex; align-items: center; gap: 15px;">
+                    <div style="font-family: 'Bebas Neue'; font-size: 1.5rem; width: 30px; text-align: center;">${i+1}</div>
+                    
+                    <div style="width: 50px; height: 70px; border-radius: 8px; background-image: url('${p.heroImg || ''}'); background-size: cover; background-position: center; border: 1px solid ${borderColor}; position: relative; background-color: #222;">
+                        <div style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.7); font-size: 0.5rem; text-align: center; color: var(--gold); border-bottom-left-radius: 7px; border-bottom-right-radius: 7px;">
+                            LVL ${p.heroLvl || 1}
+                        </div>
+                    </div>
+
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">${p.name}</div>
+                        <div style="font-size: 0.7rem; color: #aaa; margin-top: 2px;">Hero: ${p.hero}</div>
+                        <div style="color: var(--gold); font-family: 'Bebas Neue'; font-size: 1.1rem; letter-spacing: 1px;">
+                            ⚡ ${p.pwr ? p.pwr.toLocaleString() : 0} PWR
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
         });
 
         window.save();
     </script>
 </body>
-                                                                                          </html>
+        </html>
